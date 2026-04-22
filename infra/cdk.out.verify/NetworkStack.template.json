@@ -1,0 +1,393 @@
+{
+ "Resources": {
+  "SandboxVpcAAA107BE": {
+   "Type": "AWS::EC2::VPC",
+   "Properties": {
+    "CidrBlock": "10.0.0.0/16",
+    "EnableDnsHostnames": true,
+    "EnableDnsSupport": true,
+    "InstanceTenancy": "default",
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "NetworkStack/SandboxVpc"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "NetworkStack/SandboxVpc/Resource"
+   }
+  },
+  "SandboxVpcPublicSubnet1Subnet3E135B45": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": "eu-west-2a",
+    "CidrBlock": "10.0.0.0/24",
+    "MapPublicIpOnLaunch": true,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "Public"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Public"
+     },
+     {
+      "Key": "Name",
+      "Value": "NetworkStack/SandboxVpc/PublicSubnet1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "SandboxVpcAAA107BE"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "NetworkStack/SandboxVpc/PublicSubnet1/Subnet"
+   }
+  },
+  "SandboxVpcPublicSubnet1RouteTable69C7EF67": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "NetworkStack/SandboxVpc/PublicSubnet1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "SandboxVpcAAA107BE"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "NetworkStack/SandboxVpc/PublicSubnet1/RouteTable"
+   }
+  },
+  "SandboxVpcPublicSubnet1RouteTableAssociation9F0488DE": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "SandboxVpcPublicSubnet1RouteTable69C7EF67"
+    },
+    "SubnetId": {
+     "Ref": "SandboxVpcPublicSubnet1Subnet3E135B45"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "NetworkStack/SandboxVpc/PublicSubnet1/RouteTableAssociation"
+   }
+  },
+  "SandboxVpcPublicSubnet1DefaultRouteD9F9E6C3": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "GatewayId": {
+     "Ref": "SandboxVpcIGWBAB9DB24"
+    },
+    "RouteTableId": {
+     "Ref": "SandboxVpcPublicSubnet1RouteTable69C7EF67"
+    }
+   },
+   "DependsOn": [
+    "SandboxVpcVPCGW77762E77"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "NetworkStack/SandboxVpc/PublicSubnet1/DefaultRoute"
+   }
+  },
+  "SandboxVpcPublicSubnet2SubnetA646281F": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": "eu-west-2b",
+    "CidrBlock": "10.0.1.0/24",
+    "MapPublicIpOnLaunch": true,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "Public"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Public"
+     },
+     {
+      "Key": "Name",
+      "Value": "NetworkStack/SandboxVpc/PublicSubnet2"
+     }
+    ],
+    "VpcId": {
+     "Ref": "SandboxVpcAAA107BE"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "NetworkStack/SandboxVpc/PublicSubnet2/Subnet"
+   }
+  },
+  "SandboxVpcPublicSubnet2RouteTableD366FA1B": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "NetworkStack/SandboxVpc/PublicSubnet2"
+     }
+    ],
+    "VpcId": {
+     "Ref": "SandboxVpcAAA107BE"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "NetworkStack/SandboxVpc/PublicSubnet2/RouteTable"
+   }
+  },
+  "SandboxVpcPublicSubnet2RouteTableAssociation2F4744B5": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "SandboxVpcPublicSubnet2RouteTableD366FA1B"
+    },
+    "SubnetId": {
+     "Ref": "SandboxVpcPublicSubnet2SubnetA646281F"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "NetworkStack/SandboxVpc/PublicSubnet2/RouteTableAssociation"
+   }
+  },
+  "SandboxVpcPublicSubnet2DefaultRoute9152887E": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "GatewayId": {
+     "Ref": "SandboxVpcIGWBAB9DB24"
+    },
+    "RouteTableId": {
+     "Ref": "SandboxVpcPublicSubnet2RouteTableD366FA1B"
+    }
+   },
+   "DependsOn": [
+    "SandboxVpcVPCGW77762E77"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "NetworkStack/SandboxVpc/PublicSubnet2/DefaultRoute"
+   }
+  },
+  "SandboxVpcIGWBAB9DB24": {
+   "Type": "AWS::EC2::InternetGateway",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "NetworkStack/SandboxVpc"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "NetworkStack/SandboxVpc/IGW"
+   }
+  },
+  "SandboxVpcVPCGW77762E77": {
+   "Type": "AWS::EC2::VPCGatewayAttachment",
+   "Properties": {
+    "InternetGatewayId": {
+     "Ref": "SandboxVpcIGWBAB9DB24"
+    },
+    "VpcId": {
+     "Ref": "SandboxVpcAAA107BE"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "NetworkStack/SandboxVpc/VPCGW"
+   }
+  },
+  "SandboxVpcRestrictDefaultSecurityGroupCustomResourceA3C9BEF8": {
+   "Type": "Custom::VpcRestrictDefaultSG",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "CustomVpcRestrictDefaultSGCustomResourceProviderHandlerDC833E5E",
+      "Arn"
+     ]
+    },
+    "DefaultSecurityGroupId": {
+     "Fn::GetAtt": [
+      "SandboxVpcAAA107BE",
+      "DefaultSecurityGroup"
+     ]
+    },
+    "Account": "902672427642"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "NetworkStack/SandboxVpc/RestrictDefaultSecurityGroupCustomResource/Default"
+   }
+  },
+  "CustomVpcRestrictDefaultSGCustomResourceProviderRole26592FE0": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Version": "2012-10-17",
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ]
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+     }
+    ],
+    "Policies": [
+     {
+      "PolicyName": "Inline",
+      "PolicyDocument": {
+       "Version": "2012-10-17",
+       "Statement": [
+        {
+         "Effect": "Allow",
+         "Action": [
+          "ec2:AuthorizeSecurityGroupIngress",
+          "ec2:AuthorizeSecurityGroupEgress",
+          "ec2:RevokeSecurityGroupIngress",
+          "ec2:RevokeSecurityGroupEgress"
+         ],
+         "Resource": [
+          {
+           "Fn::Join": [
+            "",
+            [
+             "arn:",
+             {
+              "Ref": "AWS::Partition"
+             },
+             ":ec2:eu-west-2:902672427642:security-group/",
+             {
+              "Fn::GetAtt": [
+               "SandboxVpcAAA107BE",
+               "DefaultSecurityGroup"
+              ]
+             }
+            ]
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "NetworkStack/Custom::VpcRestrictDefaultSGCustomResourceProvider/Role"
+   }
+  },
+  "CustomVpcRestrictDefaultSGCustomResourceProviderHandlerDC833E5E": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-902672427642-eu-west-2",
+     "S3Key": "7fa1e366ee8a9ded01fc355f704cff92bfd179574e6f9cfee800a3541df1b200.zip"
+    },
+    "Timeout": 900,
+    "MemorySize": 128,
+    "Handler": "__entrypoint__.handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "CustomVpcRestrictDefaultSGCustomResourceProviderRole26592FE0",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs22.x",
+    "Description": "Lambda function for removing all inbound/outbound rules from the VPC default security group"
+   },
+   "DependsOn": [
+    "CustomVpcRestrictDefaultSGCustomResourceProviderRole26592FE0"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "NetworkStack/Custom::VpcRestrictDefaultSGCustomResourceProvider/Handler",
+    "aws:asset:path": "asset.7fa1e366ee8a9ded01fc355f704cff92bfd179574e6f9cfee800a3541df1b200",
+    "aws:asset:property": "Code"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/21PwQrCMAz9Fu9dleLFo+4gnhxTdpW2izNua6VNJyL+uxmKuwiBvLzkvSRKquVKLmb6HjNbt1mHRj4PpG0rmDqBVfJZ3azIz64qclEk06E9JOOARm5CpU8ER206mPiJW8foLWpC737DI9g5gsCTW01w14/vmm+1Jr7j0oOjlygh+hQsi1Ik308lm/1vFcEPWEPY6AiC9wPxWw26ZtTsE90S2zpfg7zG+aCU5FjMrhExC8kR9iDLT34Di96LSyQBAAA="
+   },
+   "Metadata": {
+    "aws:cdk:path": "NetworkStack/CDKMetadata/Default"
+   }
+  }
+ },
+ "Outputs": {
+  "VpcId": {
+   "Value": {
+    "Ref": "SandboxVpcAAA107BE"
+   }
+  },
+  "ExportsOutputRefSandboxVpcAAA107BE8A7837CA": {
+   "Value": {
+    "Ref": "SandboxVpcAAA107BE"
+   },
+   "Export": {
+    "Name": "NetworkStack:ExportsOutputRefSandboxVpcAAA107BE8A7837CA"
+   }
+  },
+  "ExportsOutputRefSandboxVpcPublicSubnet1Subnet3E135B45BBC51468": {
+   "Value": {
+    "Ref": "SandboxVpcPublicSubnet1Subnet3E135B45"
+   },
+   "Export": {
+    "Name": "NetworkStack:ExportsOutputRefSandboxVpcPublicSubnet1Subnet3E135B45BBC51468"
+   }
+  },
+  "ExportsOutputRefSandboxVpcPublicSubnet2SubnetA646281FB50BDA39": {
+   "Value": {
+    "Ref": "SandboxVpcPublicSubnet2SubnetA646281F"
+   },
+   "Export": {
+    "Name": "NetworkStack:ExportsOutputRefSandboxVpcPublicSubnet2SubnetA646281FB50BDA39"
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

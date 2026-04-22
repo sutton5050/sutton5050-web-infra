@@ -1,0 +1,36 @@
+{
+  "version": "53.0.0",
+  "files": {
+    "d2191f6f199b95d1c044799f514b1ceca87200b3014c43c34839aad03dc69b8c": {
+      "displayName": "GlobalCertStack/Custom::CrossRegionExportWriterCustomResourceProvider Code",
+      "source": {
+        "path": "asset.d2191f6f199b95d1c044799f514b1ceca87200b3014c43c34839aad03dc69b8c",
+        "packaging": "zip"
+      },
+      "destinations": {
+        "902672427642-us-east-1-f5d4825a": {
+          "bucketName": "cdk-hnb659fds-assets-902672427642-us-east-1",
+          "objectKey": "d2191f6f199b95d1c044799f514b1ceca87200b3014c43c34839aad03dc69b8c.zip",
+          "region": "us-east-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::902672427642:role/cdk-hnb659fds-file-publishing-role-902672427642-us-east-1"
+        }
+      }
+    },
+    "8654a76f22bd67c707ac30ff80fd60eec891611d4cdb5021e66383070851c925": {
+      "displayName": "GlobalCertStack Template",
+      "source": {
+        "path": "GlobalCertStack.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "902672427642-us-east-1-232acac6": {
+          "bucketName": "cdk-hnb659fds-assets-902672427642-us-east-1",
+          "objectKey": "8654a76f22bd67c707ac30ff80fd60eec891611d4cdb5021e66383070851c925.json",
+          "region": "us-east-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::902672427642:role/cdk-hnb659fds-file-publishing-role-902672427642-us-east-1"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

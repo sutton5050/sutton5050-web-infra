@@ -1,0 +1,68 @@
+{
+  "/AuthStack/UserPoolId": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "UserPoolId"
+    }
+  ],
+  "/AuthStack/UserPoolClientId": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "UserPoolClientId"
+    }
+  ],
+  "/AuthStack/CognitoDomainUrl": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CognitoDomainUrl"
+    }
+  ],
+  "/AuthStack/BootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BootstrapVersion"
+    }
+  ],
+  "/AuthStack/CheckBootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CheckBootstrapVersion"
+    }
+  ],
+  "/AuthStack/UserPool/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "UserPool6BA7E5F2"
+    }
+  ],
+  "/AuthStack/CDKMetadata/Default": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CDKMetadata"
+    }
+  ],
+  "/AuthStack/Exports/Output{\"Ref\":\"UserPool6BA7E5F2\"}": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ExportsOutputRefUserPool6BA7E5F296FD7236"
+    }
+  ],
+  "/AuthStack/Exports/Output{\"Ref\":\"UserPoolWebAppClientCD2D5CB1\"}": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ExportsOutputRefUserPoolWebAppClientCD2D5CB13BAB4F14"
+    }
+  ],
+  "/AuthStack/UserPool/CognitoDomain/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "UserPoolCognitoDomainD6C7F9FA"
+    }
+  ],
+  "/AuthStack/UserPool/WebAppClient/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "UserPoolWebAppClientCD2D5CB1"
+    }
+  ]
+}

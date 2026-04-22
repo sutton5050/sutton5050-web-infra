@@ -1,0 +1,100 @@
+{
+  "/StorageStack/AppTable": [
+    {
+      "type": "aws:cdk:hasPhysicalName",
+      "data": {
+        "Ref": "AppTable815C50BC"
+      }
+    }
+  ],
+  "/StorageStack/TableName": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "TableName"
+    }
+  ],
+  "/StorageStack/StorageBucketName": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "StorageBucketName"
+    }
+  ],
+  "/StorageStack/EcrRepoUri": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcrRepoUri"
+    }
+  ],
+  "/StorageStack/BootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BootstrapVersion"
+    }
+  ],
+  "/StorageStack/CheckBootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CheckBootstrapVersion"
+    }
+  ],
+  "/StorageStack/AppTable/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AppTable815C50BC"
+    }
+  ],
+  "/StorageStack/StorageBucket/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "StorageBucket19DB2FF8"
+    }
+  ],
+  "/StorageStack/BackendRepo/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BackendRepo7FFBAD06"
+    }
+  ],
+  "/StorageStack/CDKMetadata/Default": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CDKMetadata"
+    }
+  ],
+  "/StorageStack/Exports/Output{\"Fn::GetAtt\":[\"AppTable815C50BC\",\"Arn\"]}": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ExportsOutputFnGetAttAppTable815C50BCArnF3D9E3C3"
+    }
+  ],
+  "/StorageStack/Exports/Output{\"Fn::GetAtt\":[\"StorageBucket19DB2FF8\",\"Arn\"]}": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ExportsOutputFnGetAttStorageBucket19DB2FF8Arn891486CC"
+    }
+  ],
+  "/StorageStack/Exports/Output{\"Fn::GetAtt\":[\"BackendRepo7FFBAD06\",\"Arn\"]}": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ExportsOutputFnGetAttBackendRepo7FFBAD06Arn33FD1219"
+    }
+  ],
+  "/StorageStack/Exports/Output{\"Ref\":\"BackendRepo7FFBAD06\"}": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ExportsOutputRefBackendRepo7FFBAD06405267DF"
+    }
+  ],
+  "/StorageStack/Exports/Output{\"Ref\":\"AppTable815C50BC\"}": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ExportsOutputRefAppTable815C50BC1988FCFB"
+    }
+  ],
+  "/StorageStack/Exports/Output{\"Ref\":\"StorageBucket19DB2FF8\"}": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ExportsOutputRefStorageBucket19DB2FF8E6209EFA"
+    }
+  ]
+}

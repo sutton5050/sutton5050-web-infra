@@ -1,0 +1,970 @@
+{
+ "Resources": {
+  "BackendCluster5086059C": {
+   "Type": "AWS::ECS::Cluster",
+   "Properties": {
+    "ClusterName": "sutton5050-cluster"
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/BackendCluster/Resource"
+   }
+  },
+  "BackendCluster7C142F31": {
+   "Type": "AWS::ECS::ClusterCapacityProviderAssociations",
+   "Properties": {
+    "CapacityProviders": [
+     "FARGATE",
+     "FARGATE_SPOT"
+    ],
+    "Cluster": {
+     "Ref": "BackendCluster5086059C"
+    },
+    "DefaultCapacityProviderStrategy": []
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/BackendCluster/BackendCluster"
+   }
+  },
+  "BackendTaskDefTaskRoleBA953A3B": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/BackendTaskDef/TaskRole/Resource"
+   }
+  },
+  "BackendTaskDefTaskRoleDefaultPolicy2C657A56": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "dynamodb:BatchGetItem",
+        "dynamodb:Query",
+        "dynamodb:GetItem",
+        "dynamodb:Scan",
+        "dynamodb:ConditionCheckItem",
+        "dynamodb:BatchWriteItem",
+        "dynamodb:PutItem",
+        "dynamodb:UpdateItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:DescribeTable"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::ImportValue": "StorageStack:ExportsOutputFnGetAttAppTable815C50BCArnF3D9E3C3"
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::ImportValue": "StorageStack:ExportsOutputFnGetAttAppTable815C50BCArnF3D9E3C3"
+           },
+           "/index/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": [
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::ImportValue": "StorageStack:ExportsOutputFnGetAttAppTable815C50BCArnF3D9E3C3"
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::ImportValue": "StorageStack:ExportsOutputFnGetAttAppTable815C50BCArnF3D9E3C3"
+           },
+           "/index/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": [
+        "s3:GetObject*",
+        "s3:GetBucket*",
+        "s3:List*",
+        "s3:DeleteObject*",
+        "s3:PutObject",
+        "s3:PutObjectLegalHold",
+        "s3:PutObjectRetention",
+        "s3:PutObjectTagging",
+        "s3:PutObjectVersionTagging",
+        "s3:Abort*"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::ImportValue": "StorageStack:ExportsOutputFnGetAttStorageBucket19DB2FF8Arn891486CC"
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::ImportValue": "StorageStack:ExportsOutputFnGetAttStorageBucket19DB2FF8Arn891486CC"
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "BackendTaskDefTaskRoleDefaultPolicy2C657A56",
+    "Roles": [
+     {
+      "Ref": "BackendTaskDefTaskRoleBA953A3B"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/BackendTaskDef/TaskRole/DefaultPolicy/Resource"
+   }
+  },
+  "BackendTaskDef6ECE986E": {
+   "Type": "AWS::ECS::TaskDefinition",
+   "Properties": {
+    "ContainerDefinitions": [
+     {
+      "Environment": [
+       {
+        "Name": "AWS_DEFAULT_REGION",
+        "Value": "eu-west-2"
+       },
+       {
+        "Name": "DYNAMODB_TABLE_NAME",
+        "Value": {
+         "Fn::ImportValue": "StorageStack:ExportsOutputRefAppTable815C50BC1988FCFB"
+        }
+       },
+       {
+        "Name": "S3_BUCKET_NAME",
+        "Value": {
+         "Fn::ImportValue": "StorageStack:ExportsOutputRefStorageBucket19DB2FF8E6209EFA"
+        }
+       },
+       {
+        "Name": "COGNITO_USER_POOL_ID",
+        "Value": {
+         "Fn::ImportValue": "AuthStack:ExportsOutputRefUserPool6BA7E5F296FD7236"
+        }
+       },
+       {
+        "Name": "COGNITO_APP_CLIENT_ID",
+        "Value": {
+         "Fn::ImportValue": "AuthStack:ExportsOutputRefUserPoolWebAppClientCD2D5CB13BAB4F14"
+        }
+       },
+       {
+        "Name": "COGNITO_REGION",
+        "Value": "eu-west-2"
+       }
+      ],
+      "Essential": true,
+      "Image": {
+       "Fn::Join": [
+        "",
+        [
+         {
+          "Fn::Select": [
+           4,
+           {
+            "Fn::Split": [
+             ":",
+             {
+              "Fn::ImportValue": "StorageStack:ExportsOutputFnGetAttBackendRepo7FFBAD06Arn33FD1219"
+             }
+            ]
+           }
+          ]
+         },
+         ".dkr.ecr.",
+         {
+          "Fn::Select": [
+           3,
+           {
+            "Fn::Split": [
+             ":",
+             {
+              "Fn::ImportValue": "StorageStack:ExportsOutputFnGetAttBackendRepo7FFBAD06Arn33FD1219"
+             }
+            ]
+           }
+          ]
+         },
+         ".",
+         {
+          "Ref": "AWS::URLSuffix"
+         },
+         "/",
+         {
+          "Fn::ImportValue": "StorageStack:ExportsOutputRefBackendRepo7FFBAD06405267DF"
+         },
+         ":latest"
+        ]
+       ]
+      },
+      "LogConfiguration": {
+       "LogDriver": "awslogs",
+       "Options": {
+        "awslogs-group": {
+         "Ref": "BackendLogs21FC23BC"
+        },
+        "awslogs-stream-prefix": "backend",
+        "awslogs-region": "eu-west-2"
+       }
+      },
+      "Name": "backend",
+      "PortMappings": [
+       {
+        "ContainerPort": 8000,
+        "Protocol": "tcp"
+       }
+      ]
+     }
+    ],
+    "Cpu": "256",
+    "ExecutionRoleArn": {
+     "Fn::GetAtt": [
+      "BackendTaskDefExecutionRoleC5A001DB",
+      "Arn"
+     ]
+    },
+    "Family": "BackendStackBackendTaskDef8838505F",
+    "Memory": "512",
+    "NetworkMode": "awsvpc",
+    "RequiresCompatibilities": [
+     "FARGATE"
+    ],
+    "TaskRoleArn": {
+     "Fn::GetAtt": [
+      "BackendTaskDefTaskRoleBA953A3B",
+      "Arn"
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/BackendTaskDef/Resource"
+   }
+  },
+  "BackendTaskDefExecutionRoleC5A001DB": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/BackendTaskDef/ExecutionRole/Resource"
+   }
+  },
+  "BackendTaskDefExecutionRoleDefaultPolicyAA625660": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:GetDownloadUrlForLayer",
+        "ecr:BatchGetImage"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::ImportValue": "StorageStack:ExportsOutputFnGetAttBackendRepo7FFBAD06Arn33FD1219"
+       }
+      },
+      {
+       "Action": "ecr:GetAuthorizationToken",
+       "Effect": "Allow",
+       "Resource": "*"
+      },
+      {
+       "Action": [
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "BackendLogs21FC23BC",
+         "Arn"
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "BackendTaskDefExecutionRoleDefaultPolicyAA625660",
+    "Roles": [
+     {
+      "Ref": "BackendTaskDefExecutionRoleC5A001DB"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/BackendTaskDef/ExecutionRole/DefaultPolicy/Resource"
+   }
+  },
+  "BackendLogs21FC23BC": {
+   "Type": "AWS::Logs::LogGroup",
+   "Properties": {
+    "LogGroupName": "/ecs/sutton5050-backend",
+    "RetentionInDays": 7
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/BackendLogs/Resource"
+   }
+  },
+  "ServiceSg2632F788": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "Backend Fargate service",
+    "SecurityGroupEgress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow all outbound traffic by default",
+      "IpProtocol": "-1"
+     }
+    ],
+    "SecurityGroupIngress": [
+     {
+      "Description": "Allow ALB to backend",
+      "FromPort": 8000,
+      "IpProtocol": "tcp",
+      "SourceSecurityGroupId": {
+       "Fn::GetAtt": [
+        "BackendAlbSecurityGroupFA70C18B",
+        "GroupId"
+       ]
+      },
+      "ToPort": 8000
+     }
+    ],
+    "VpcId": {
+     "Fn::ImportValue": "NetworkStack:ExportsOutputRefSandboxVpcAAA107BE8A7837CA"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/ServiceSg/Resource"
+   }
+  },
+  "ServiceSgfromBackendStackBackendAlbSecurityGroupC7E1669F8000E5D86DE5": {
+   "Type": "AWS::EC2::SecurityGroupIngress",
+   "Properties": {
+    "Description": "Load balancer to target",
+    "FromPort": 8000,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "ServiceSg2632F788",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "SourceSecurityGroupId": {
+     "Fn::GetAtt": [
+      "BackendAlbSecurityGroupFA70C18B",
+      "GroupId"
+     ]
+    },
+    "ToPort": 8000
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/ServiceSg/from BackendStackBackendAlbSecurityGroupC7E1669F:8000"
+   }
+  },
+  "BackendService7A4224EE": {
+   "Type": "AWS::ECS::Service",
+   "Properties": {
+    "CapacityProviderStrategy": [
+     {
+      "Base": 1,
+      "CapacityProvider": "FARGATE",
+      "Weight": 1
+     }
+    ],
+    "Cluster": {
+     "Ref": "BackendCluster5086059C"
+    },
+    "DeploymentConfiguration": {
+     "Alarms": {
+      "AlarmNames": [],
+      "Enable": false,
+      "Rollback": false
+     },
+     "DeploymentCircuitBreaker": {
+      "Enable": true,
+      "Rollback": true
+     },
+     "MaximumPercent": 200,
+     "MinimumHealthyPercent": 50
+    },
+    "DeploymentController": {
+     "Type": "ECS"
+    },
+    "DesiredCount": 1,
+    "EnableECSManagedTags": false,
+    "HealthCheckGracePeriodSeconds": 120,
+    "LoadBalancers": [
+     {
+      "ContainerName": "backend",
+      "ContainerPort": 8000,
+      "TargetGroupArn": {
+       "Ref": "BackendAlbHttpListenerBackendTargetGroupFD8C31D2"
+      }
+     }
+    ],
+    "NetworkConfiguration": {
+     "AwsvpcConfiguration": {
+      "AssignPublicIp": "ENABLED",
+      "SecurityGroups": [
+       {
+        "Fn::GetAtt": [
+         "ServiceSg2632F788",
+         "GroupId"
+        ]
+       }
+      ],
+      "Subnets": [
+       {
+        "Fn::ImportValue": "NetworkStack:ExportsOutputRefSandboxVpcPublicSubnet1Subnet3E135B45BBC51468"
+       },
+       {
+        "Fn::ImportValue": "NetworkStack:ExportsOutputRefSandboxVpcPublicSubnet2SubnetA646281FB50BDA39"
+       }
+      ]
+     }
+    },
+    "ServiceName": "sutton5050-backend",
+    "TaskDefinition": {
+     "Ref": "BackendTaskDef6ECE986E"
+    }
+   },
+   "DependsOn": [
+    "BackendAlbHttpListenerBackendTargetGroupFD8C31D2",
+    "BackendAlbHttpListener58B160AA",
+    "BackendTaskDefTaskRoleDefaultPolicy2C657A56",
+    "BackendTaskDefTaskRoleBA953A3B"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/BackendService/Service"
+   }
+  },
+  "BackendAlb0D5FE5C5": {
+   "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+   "Properties": {
+    "LoadBalancerAttributes": [
+     {
+      "Key": "deletion_protection.enabled",
+      "Value": "false"
+     }
+    ],
+    "Name": "sutton5050-backend-alb",
+    "Scheme": "internet-facing",
+    "SecurityGroups": [
+     {
+      "Fn::GetAtt": [
+       "BackendAlbSecurityGroupFA70C18B",
+       "GroupId"
+      ]
+     }
+    ],
+    "Subnets": [
+     {
+      "Fn::ImportValue": "NetworkStack:ExportsOutputRefSandboxVpcPublicSubnet1Subnet3E135B45BBC51468"
+     },
+     {
+      "Fn::ImportValue": "NetworkStack:ExportsOutputRefSandboxVpcPublicSubnet2SubnetA646281FB50BDA39"
+     }
+    ],
+    "Type": "application"
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/BackendAlb/Resource"
+   }
+  },
+  "BackendAlbSecurityGroupFA70C18B": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "Automatically created Security Group for ELB BackendStackBackendAlb36E3B3D6",
+    "SecurityGroupIngress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow from anyone on port 80",
+      "FromPort": 80,
+      "IpProtocol": "tcp",
+      "ToPort": 80
+     }
+    ],
+    "VpcId": {
+     "Fn::ImportValue": "NetworkStack:ExportsOutputRefSandboxVpcAAA107BE8A7837CA"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/BackendAlb/SecurityGroup/Resource"
+   }
+  },
+  "BackendAlbSecurityGrouptoBackendStackServiceSgA2406E9480002DE15434": {
+   "Type": "AWS::EC2::SecurityGroupEgress",
+   "Properties": {
+    "Description": "Load balancer to target",
+    "DestinationSecurityGroupId": {
+     "Fn::GetAtt": [
+      "ServiceSg2632F788",
+      "GroupId"
+     ]
+    },
+    "FromPort": 8000,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "BackendAlbSecurityGroupFA70C18B",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "ToPort": 8000
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/BackendAlb/SecurityGroup/to BackendStackServiceSgA2406E94:8000"
+   }
+  },
+  "BackendAlbHttpListener58B160AA": {
+   "Type": "AWS::ElasticLoadBalancingV2::Listener",
+   "Properties": {
+    "DefaultActions": [
+     {
+      "TargetGroupArn": {
+       "Ref": "BackendAlbHttpListenerBackendTargetGroupFD8C31D2"
+      },
+      "Type": "forward"
+     }
+    ],
+    "LoadBalancerArn": {
+     "Ref": "BackendAlb0D5FE5C5"
+    },
+    "Port": 80,
+    "Protocol": "HTTP"
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/BackendAlb/HttpListener/Resource"
+   }
+  },
+  "BackendAlbHttpListenerBackendTargetGroupFD8C31D2": {
+   "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+   "Properties": {
+    "HealthCheckIntervalSeconds": 15,
+    "HealthCheckPath": "/health",
+    "HealthCheckPort": "8000",
+    "HealthCheckTimeoutSeconds": 10,
+    "HealthyThresholdCount": 2,
+    "Port": 8000,
+    "Protocol": "HTTP",
+    "TargetGroupAttributes": [
+     {
+      "Key": "stickiness.enabled",
+      "Value": "false"
+     }
+    ],
+    "TargetType": "ip",
+    "UnhealthyThresholdCount": 3,
+    "VpcId": {
+     "Fn::ImportValue": "NetworkStack:ExportsOutputRefSandboxVpcAAA107BE8A7837CA"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/BackendAlb/HttpListener/BackendTargetGroup/Resource"
+   }
+  },
+  "ApiCert744F7693": {
+   "Type": "AWS::CertificateManager::Certificate",
+   "Properties": {
+    "DomainName": "api.sutton5050.com",
+    "DomainValidationOptions": [
+     {
+      "DomainName": "api.sutton5050.com",
+      "HostedZoneId": "Z03151509FL1UXA4XHI7"
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "BackendStack/ApiCert"
+     }
+    ],
+    "ValidationMethod": "DNS"
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/ApiCert/Resource"
+   }
+  },
+  "HttpApi": {
+   "Type": "AWS::ApiGatewayV2::Api",
+   "Properties": {
+    "CorsConfiguration": {
+     "AllowHeaders": [
+      "Authorization",
+      "Content-Type"
+     ],
+     "AllowMethods": [
+      "GET",
+      "POST",
+      "PUT",
+      "DELETE",
+      "OPTIONS"
+     ],
+     "AllowOrigins": [
+      "https://sutton5050.com",
+      "http://localhost:5173"
+     ],
+     "MaxAge": 3600
+    },
+    "Name": "sutton5050-api",
+    "ProtocolType": "HTTP"
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/HttpApi"
+   }
+  },
+  "ApiDomainName": {
+   "Type": "AWS::ApiGatewayV2::DomainName",
+   "Properties": {
+    "DomainName": "api.sutton5050.com",
+    "DomainNameConfigurations": [
+     {
+      "CertificateArn": {
+       "Ref": "ApiCert744F7693"
+      },
+      "EndpointType": "REGIONAL"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/ApiDomainName"
+   }
+  },
+  "VpcLink": {
+   "Type": "AWS::ApiGatewayV2::VpcLink",
+   "Properties": {
+    "Name": "sutton5050-vpc-link",
+    "SecurityGroupIds": [
+     {
+      "Fn::GetAtt": [
+       "BackendAlbSecurityGroupFA70C18B",
+       "GroupId"
+      ]
+     }
+    ],
+    "SubnetIds": [
+     {
+      "Fn::ImportValue": "NetworkStack:ExportsOutputRefSandboxVpcPublicSubnet1Subnet3E135B45BBC51468"
+     },
+     {
+      "Fn::ImportValue": "NetworkStack:ExportsOutputRefSandboxVpcPublicSubnet2SubnetA646281FB50BDA39"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/VpcLink"
+   }
+  },
+  "CognitoAuthorizer": {
+   "Type": "AWS::ApiGatewayV2::Authorizer",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApi"
+    },
+    "AuthorizerType": "JWT",
+    "IdentitySource": [
+     "$request.header.Authorization"
+    ],
+    "JwtConfiguration": {
+     "Audience": [
+      {
+       "Fn::ImportValue": "AuthStack:ExportsOutputRefUserPoolWebAppClientCD2D5CB13BAB4F14"
+      }
+     ],
+     "Issuer": {
+      "Fn::Join": [
+       "",
+       [
+        "https://cognito-idp.eu-west-2.amazonaws.com/",
+        {
+         "Fn::ImportValue": "AuthStack:ExportsOutputRefUserPool6BA7E5F296FD7236"
+        }
+       ]
+      ]
+     }
+    },
+    "Name": "cognito-jwt"
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/CognitoAuthorizer"
+   }
+  },
+  "AlbIntegration": {
+   "Type": "AWS::ApiGatewayV2::Integration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApi"
+    },
+    "ConnectionId": {
+     "Ref": "VpcLink"
+    },
+    "ConnectionType": "VPC_LINK",
+    "IntegrationMethod": "ANY",
+    "IntegrationType": "HTTP_PROXY",
+    "IntegrationUri": {
+     "Ref": "BackendAlbHttpListener58B160AA"
+    },
+    "PayloadFormatVersion": "1.0"
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/AlbIntegration"
+   }
+  },
+  "DefaultRoute": {
+   "Type": "AWS::ApiGatewayV2::Route",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApi"
+    },
+    "AuthorizationType": "JWT",
+    "AuthorizerId": {
+     "Ref": "CognitoAuthorizer"
+    },
+    "RouteKey": "$default",
+    "Target": {
+     "Fn::Join": [
+      "",
+      [
+       "integrations/",
+       {
+        "Ref": "AlbIntegration"
+       }
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/DefaultRoute"
+   }
+  },
+  "HealthRoute": {
+   "Type": "AWS::ApiGatewayV2::Route",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApi"
+    },
+    "AuthorizationType": "NONE",
+    "RouteKey": "GET /health",
+    "Target": {
+     "Fn::Join": [
+      "",
+      [
+       "integrations/",
+       {
+        "Ref": "AlbIntegration"
+       }
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/HealthRoute"
+   }
+  },
+  "ApiStage": {
+   "Type": "AWS::ApiGatewayV2::Stage",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApi"
+    },
+    "AutoDeploy": true,
+    "StageName": "$default"
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/ApiStage"
+   }
+  },
+  "ApiMapping": {
+   "Type": "AWS::ApiGatewayV2::ApiMapping",
+   "Properties": {
+    "ApiId": {
+     "Ref": "HttpApi"
+    },
+    "DomainName": "api.sutton5050.com",
+    "Stage": "$default"
+   },
+   "DependsOn": [
+    "ApiDomainName"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/ApiMapping"
+   }
+  },
+  "ApiDnsRecordD7F299CB": {
+   "Type": "AWS::Route53::RecordSet",
+   "Properties": {
+    "HostedZoneId": "Z03151509FL1UXA4XHI7",
+    "Name": "api.sutton5050.com.",
+    "ResourceRecords": [
+     {
+      "Fn::GetAtt": [
+       "ApiDomainName",
+       "RegionalDomainName"
+      ]
+     }
+    ],
+    "TTL": "300",
+    "Type": "CNAME"
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/ApiDnsRecord/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/31STW/CMAz9LdxDh7rtsCODbUJiGwK062RS0xnaJEpSEEP573NSvjakSZXy/J7tvNjNs/zuIet1YOu6slh3K1pk+5kHuRZMfe5Rumw/qBrn0YrBUl3DARiQ5HcTqzdUoO07pyWBJ62ceAZbgsc5uPUQl6Qo0rH4L6OVB1JoL7hD7QzthiTGogMMgqDO9lNdJTadE12R3MWwRUFUumTrY12+WN2YqBxxEChzfiXKxrLxk/4/MVKlReeu+KdEc88KnCdZaSgWUIGSpMoNX9M3hg2leYxZe0xaO8Ff8WUe8WDVIeeIL/Q5Twb9yeZFGAS38rSMiViDghIt7+/MpcWdwyDAUJzyFnbRLKt9QzFpqGteyBvUqeTDyDGpdYT9xn9pS9+tvZHyWFo4rnWqm/YO/oXKBLjdKxjDwwjCRvX+lq9R3HeKUtsiVSU0Qx9CDN8bbxofhNIFZit3s8nzjL9eZ+WIurZRnmrMpu35A6aRAi/BAgAA"
+   },
+   "Metadata": {
+    "aws:cdk:path": "BackendStack/CDKMetadata/Default"
+   }
+  }
+ },
+ "Outputs": {
+  "ApiUrl": {
+   "Value": "https://api.sutton5050.com"
+  },
+  "EcrRepoUri": {
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      {
+       "Fn::Select": [
+        4,
+        {
+         "Fn::Split": [
+          ":",
+          {
+           "Fn::ImportValue": "StorageStack:ExportsOutputFnGetAttBackendRepo7FFBAD06Arn33FD1219"
+          }
+         ]
+        }
+       ]
+      },
+      ".dkr.ecr.",
+      {
+       "Fn::Select": [
+        3,
+        {
+         "Fn::Split": [
+          ":",
+          {
+           "Fn::ImportValue": "StorageStack:ExportsOutputFnGetAttBackendRepo7FFBAD06Arn33FD1219"
+          }
+         ]
+        }
+       ]
+      },
+      ".",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/",
+      {
+       "Fn::ImportValue": "StorageStack:ExportsOutputRefBackendRepo7FFBAD06405267DF"
+      }
+     ]
+    ]
+   }
+  },
+  "ClusterName": {
+   "Value": {
+    "Ref": "BackendCluster5086059C"
+   }
+  },
+  "ServiceName": {
+   "Value": {
+    "Fn::GetAtt": [
+     "BackendService7A4224EE",
+     "Name"
+    ]
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

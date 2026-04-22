@@ -1,0 +1,307 @@
+{
+ "Resources": {
+  "AppTable815C50BC": {
+   "Type": "AWS::DynamoDB::Table",
+   "Properties": {
+    "AttributeDefinitions": [
+     {
+      "AttributeName": "pk",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "sk",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "gsi1pk",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "gsi1sk",
+      "AttributeType": "S"
+     }
+    ],
+    "BillingMode": "PAY_PER_REQUEST",
+    "GlobalSecondaryIndexes": [
+     {
+      "IndexName": "gsi1",
+      "KeySchema": [
+       {
+        "AttributeName": "gsi1pk",
+        "KeyType": "HASH"
+       },
+       {
+        "AttributeName": "gsi1sk",
+        "KeyType": "RANGE"
+       }
+      ],
+      "Projection": {
+       "ProjectionType": "ALL"
+      }
+     }
+    ],
+    "KeySchema": [
+     {
+      "AttributeName": "pk",
+      "KeyType": "HASH"
+     },
+     {
+      "AttributeName": "sk",
+      "KeyType": "RANGE"
+     }
+    ],
+    "PointInTimeRecoverySpecification": {
+     "PointInTimeRecoveryEnabled": true
+    },
+    "TableName": "sutton5050-app",
+    "TimeToLiveSpecification": {
+     "AttributeName": "expiresAt",
+     "Enabled": true
+    }
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "StorageStack/AppTable/Resource"
+   }
+  },
+  "StorageBucket19DB2FF8": {
+   "Type": "AWS::S3::Bucket",
+   "Properties": {
+    "BucketEncryption": {
+     "ServerSideEncryptionConfiguration": [
+      {
+       "ServerSideEncryptionByDefault": {
+        "SSEAlgorithm": "AES256"
+       }
+      }
+     ]
+    },
+    "BucketName": {
+     "Fn::Join": [
+      "",
+      [
+       "sutton5050-storage-",
+       {
+        "Ref": "AWS::AccountId"
+       }
+      ]
+     ]
+    },
+    "CorsConfiguration": {
+     "CorsRules": [
+      {
+       "AllowedHeaders": [
+        "*"
+       ],
+       "AllowedMethods": [
+        "GET",
+        "PUT",
+        "POST"
+       ],
+       "AllowedOrigins": [
+        "https://sutton5050.com",
+        "http://localhost:5173"
+       ],
+       "MaxAge": 3600
+      }
+     ]
+    },
+    "PublicAccessBlockConfiguration": {
+     "BlockPublicAcls": true,
+     "BlockPublicPolicy": true,
+     "IgnorePublicAcls": true,
+     "RestrictPublicBuckets": true
+    },
+    "VersioningConfiguration": {
+     "Status": "Enabled"
+    }
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "StorageStack/StorageBucket/Resource"
+   }
+  },
+  "BackendRepo7FFBAD06": {
+   "Type": "AWS::ECR::Repository",
+   "Properties": {
+    "EmptyOnDelete": true,
+    "ImageScanningConfiguration": {
+     "ScanOnPush": true
+    },
+    "LifecyclePolicy": {
+     "LifecyclePolicyText": "{\"rules\":[{\"rulePriority\":1,\"description\":\"Keep last 5 images\",\"selection\":{\"tagStatus\":\"any\",\"countType\":\"imageCountMoreThan\",\"countNumber\":5},\"action\":{\"type\":\"expire\"}}]}"
+    },
+    "RepositoryName": "sutton5050-backend"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "StorageStack/BackendRepo/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/0WMQQrDIBBFz5K9mQbbTbftAQo2+2J0CsZEg6MtQbx7TbIoDPz33zDDgV+u0DXyS63Stp3MAPkZpbKsqlfWq5Oz11X2cpiQ3d9uh8LoDPmWlMW4yYMKQxUgC1w8mejDuq3+rRQmkHwKan/0SHFJ9cZ5jTDS6cM51OmakYxpQ3LRzAjiyB965EYoqQAAAA=="
+   },
+   "Metadata": {
+    "aws:cdk:path": "StorageStack/CDKMetadata/Default"
+   }
+  }
+ },
+ "Outputs": {
+  "TableName": {
+   "Value": {
+    "Ref": "AppTable815C50BC"
+   }
+  },
+  "StorageBucketName": {
+   "Value": {
+    "Ref": "StorageBucket19DB2FF8"
+   }
+  },
+  "EcrRepoUri": {
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      {
+       "Fn::Select": [
+        4,
+        {
+         "Fn::Split": [
+          ":",
+          {
+           "Fn::GetAtt": [
+            "BackendRepo7FFBAD06",
+            "Arn"
+           ]
+          }
+         ]
+        }
+       ]
+      },
+      ".dkr.ecr.",
+      {
+       "Fn::Select": [
+        3,
+        {
+         "Fn::Split": [
+          ":",
+          {
+           "Fn::GetAtt": [
+            "BackendRepo7FFBAD06",
+            "Arn"
+           ]
+          }
+         ]
+        }
+       ]
+      },
+      ".",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/",
+      {
+       "Ref": "BackendRepo7FFBAD06"
+      }
+     ]
+    ]
+   }
+  },
+  "ExportsOutputFnGetAttAppTable815C50BCArnF3D9E3C3": {
+   "Value": {
+    "Fn::GetAtt": [
+     "AppTable815C50BC",
+     "Arn"
+    ]
+   },
+   "Export": {
+    "Name": "StorageStack:ExportsOutputFnGetAttAppTable815C50BCArnF3D9E3C3"
+   }
+  },
+  "ExportsOutputFnGetAttStorageBucket19DB2FF8Arn891486CC": {
+   "Value": {
+    "Fn::GetAtt": [
+     "StorageBucket19DB2FF8",
+     "Arn"
+    ]
+   },
+   "Export": {
+    "Name": "StorageStack:ExportsOutputFnGetAttStorageBucket19DB2FF8Arn891486CC"
+   }
+  },
+  "ExportsOutputFnGetAttBackendRepo7FFBAD06Arn33FD1219": {
+   "Value": {
+    "Fn::GetAtt": [
+     "BackendRepo7FFBAD06",
+     "Arn"
+    ]
+   },
+   "Export": {
+    "Name": "StorageStack:ExportsOutputFnGetAttBackendRepo7FFBAD06Arn33FD1219"
+   }
+  },
+  "ExportsOutputRefBackendRepo7FFBAD06405267DF": {
+   "Value": {
+    "Ref": "BackendRepo7FFBAD06"
+   },
+   "Export": {
+    "Name": "StorageStack:ExportsOutputRefBackendRepo7FFBAD06405267DF"
+   }
+  },
+  "ExportsOutputRefAppTable815C50BC1988FCFB": {
+   "Value": {
+    "Ref": "AppTable815C50BC"
+   },
+   "Export": {
+    "Name": "StorageStack:ExportsOutputRefAppTable815C50BC1988FCFB"
+   }
+  },
+  "ExportsOutputRefStorageBucket19DB2FF8E6209EFA": {
+   "Value": {
+    "Ref": "StorageBucket19DB2FF8"
+   },
+   "Export": {
+    "Name": "StorageStack:ExportsOutputRefStorageBucket19DB2FF8E6209EFA"
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

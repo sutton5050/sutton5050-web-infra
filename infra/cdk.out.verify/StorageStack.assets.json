@@ -1,0 +1,21 @@
+{
+  "version": "53.0.0",
+  "files": {
+    "c171031e5b2454ba755a0a4864ff6b81383c4111fdd1bfd1d28ff3e6d783ffb9": {
+      "displayName": "StorageStack Template",
+      "source": {
+        "path": "StorageStack.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "902672427642-eu-west-2-f25ca5e2": {
+          "bucketName": "cdk-hnb659fds-assets-902672427642-eu-west-2",
+          "objectKey": "c171031e5b2454ba755a0a4864ff6b81383c4111fdd1bfd1d28ff3e6d783ffb9.json",
+          "region": "eu-west-2",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::902672427642:role/cdk-hnb659fds-file-publishing-role-902672427642-eu-west-2"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

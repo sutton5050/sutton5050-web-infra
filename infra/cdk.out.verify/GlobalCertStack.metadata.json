@@ -1,0 +1,56 @@
+{
+  "/GlobalCertStack/CertificateArn": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CertificateArn"
+    }
+  ],
+  "/GlobalCertStack/Custom::CrossRegionExportWriterCustomResourceProvider": [
+    {
+      "type": "aws:cdk:is-custom-resource-handler-customResourceProvider",
+      "data": true
+    }
+  ],
+  "/GlobalCertStack/BootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BootstrapVersion"
+    }
+  ],
+  "/GlobalCertStack/CheckBootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CheckBootstrapVersion"
+    }
+  ],
+  "/GlobalCertStack/CloudFrontCert/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CloudFrontCertC2FD7286"
+    }
+  ],
+  "/GlobalCertStack/CDKMetadata/Default": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CDKMetadata"
+    }
+  ],
+  "/GlobalCertStack/Custom::CrossRegionExportWriterCustomResourceProvider/Role": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CustomCrossRegionExportWriterCustomResourceProviderRoleC951B1E1"
+    }
+  ],
+  "/GlobalCertStack/Custom::CrossRegionExportWriterCustomResourceProvider/Handler": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CustomCrossRegionExportWriterCustomResourceProviderHandlerD8786E8A"
+    }
+  ],
+  "/GlobalCertStack/ExportsWritereuwest25F52B32F/Resource/Default": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ExportsWritereuwest25F52B32F9AB3BFFD"
+    }
+  ]
+}

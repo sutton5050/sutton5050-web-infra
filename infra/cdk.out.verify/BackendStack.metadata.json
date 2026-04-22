@@ -1,0 +1,242 @@
+{
+  "/BackendStack/BackendService": [
+    {
+      "type": "aws:cdk:warning",
+      "data": "minHealthyPercent has not been configured so the default value of 50% is used. The number of running tasks will decrease below the desired count during deployments etc. See https://github.com/aws/aws-cdk/issues/31705 [ack: @aws-cdk/aws-ecs:minHealthyPercent]",
+      "trace": [
+        "Annotations.addMessage (/Users/joefarrelly/Desktop/sutton5050_web/infra/node_modules/aws-cdk-lib/core/lib/annotations.js:1:2399)",
+        "Annotations.addWarningV2 (/Users/joefarrelly/Desktop/sutton5050_web/infra/node_modules/aws-cdk-lib/core/lib/annotations.js:1:1087)",
+        "new BaseService2 (/Users/joefarrelly/Desktop/sutton5050_web/infra/node_modules/aws-cdk-lib/aws-ecs/lib/base/base-service.js:1:12795)",
+        "new FargateService2 (/Users/joefarrelly/Desktop/sutton5050_web/infra/node_modules/aws-cdk-lib/aws-ecs/lib/fargate/fargate-service.js:1:6805)",
+        "new FargateService2 (/Users/joefarrelly/Desktop/sutton5050_web/infra/node_modules/aws-cdk-lib/core/lib/prop-injectable.js:1:855)",
+        "new BackendStack (/Users/joefarrelly/Desktop/sutton5050_web/infra/lib/backend-stack.ts:90:21)",
+        "Object.<anonymous> (/Users/joefarrelly/Desktop/sutton5050_web/infra/bin/app.ts:68:22)",
+        "Module._compile (node:internal/modules/cjs/loader:1706:14)",
+        "Module.m._compile (/Users/joefarrelly/Desktop/sutton5050_web/infra/node_modules/ts-node/src/index.ts:1618:23)",
+        "Module._extensions..js (node:internal/modules/cjs/loader:1839:10)",
+        "Object.require.extensions.<computed> [as .ts] (/Users/joefarrelly/Desktop/sutton5050_web/infra/node_modules/ts-node/src/index.ts:1621:12)",
+        "Module.load (node:internal/modules/cjs/loader:1441:32)",
+        "Function.Module._load (node:internal/modules/cjs/loader:1263:12)",
+        "TracingChannel.traceSync (node:diagnostics_channel:328:14)",
+        "wrapModuleLoad (node:internal/modules/cjs/loader:237:24)",
+        "Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)",
+        "phase4 (/Users/joefarrelly/Desktop/sutton5050_web/infra/node_modules/ts-node/src/bin.ts:649:14)",
+        "bootstrap (/Users/joefarrelly/Desktop/sutton5050_web/infra/node_modules/ts-node/src/bin.ts:95:10)",
+        "main (/Users/joefarrelly/Desktop/sutton5050_web/infra/node_modules/ts-node/src/bin.ts:55:10)",
+        "Object.<anonymous> (/Users/joefarrelly/Desktop/sutton5050_web/infra/node_modules/ts-node/src/bin.ts:800:3)",
+        "Module._compile (node:internal/modules/cjs/loader:1706:14)",
+        "Object.Module._extensions..js (node:internal/modules/cjs/loader:1839:10)",
+        "Module.load (node:internal/modules/cjs/loader:1441:32)",
+        "Function.Module._load (node:internal/modules/cjs/loader:1263:12)",
+        "TracingChannel.traceSync (node:diagnostics_channel:328:14)",
+        "wrapModuleLoad (node:internal/modules/cjs/loader:237:24)",
+        "Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)",
+        "node:internal/main/run_main_module:36:49"
+      ]
+    }
+  ],
+  "/BackendStack/HttpApi": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "HttpApi"
+    }
+  ],
+  "/BackendStack/ApiDomainName": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ApiDomainName"
+    }
+  ],
+  "/BackendStack/VpcLink": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcLink"
+    }
+  ],
+  "/BackendStack/CognitoAuthorizer": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CognitoAuthorizer"
+    }
+  ],
+  "/BackendStack/AlbIntegration": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AlbIntegration"
+    }
+  ],
+  "/BackendStack/DefaultRoute": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "DefaultRoute"
+    }
+  ],
+  "/BackendStack/HealthRoute": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "HealthRoute"
+    }
+  ],
+  "/BackendStack/ApiStage": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ApiStage"
+    }
+  ],
+  "/BackendStack/ApiMapping": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ApiMapping"
+    }
+  ],
+  "/BackendStack/ApiUrl": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ApiUrl"
+    }
+  ],
+  "/BackendStack/EcrRepoUri": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcrRepoUri"
+    }
+  ],
+  "/BackendStack/ClusterName": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ClusterName"
+    }
+  ],
+  "/BackendStack/ServiceName": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ServiceName"
+    }
+  ],
+  "/BackendStack/BootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BootstrapVersion"
+    }
+  ],
+  "/BackendStack/CheckBootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CheckBootstrapVersion"
+    }
+  ],
+  "/BackendStack/BackendCluster/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BackendCluster5086059C"
+    }
+  ],
+  "/BackendStack/BackendCluster/BackendCluster": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BackendCluster7C142F31"
+    }
+  ],
+  "/BackendStack/BackendTaskDef/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BackendTaskDef6ECE986E"
+    }
+  ],
+  "/BackendStack/BackendLogs/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BackendLogs21FC23BC"
+    }
+  ],
+  "/BackendStack/ServiceSg/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ServiceSg2632F788"
+    }
+  ],
+  "/BackendStack/ServiceSg/from BackendStackBackendAlbSecurityGroupC7E1669F:8000": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ServiceSgfromBackendStackBackendAlbSecurityGroupC7E1669F8000E5D86DE5"
+    }
+  ],
+  "/BackendStack/BackendService/Service": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BackendService7A4224EE"
+    }
+  ],
+  "/BackendStack/BackendAlb/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BackendAlb0D5FE5C5"
+    }
+  ],
+  "/BackendStack/ApiCert/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ApiCert744F7693"
+    }
+  ],
+  "/BackendStack/ApiDnsRecord/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ApiDnsRecordD7F299CB"
+    }
+  ],
+  "/BackendStack/CDKMetadata/Default": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CDKMetadata"
+    }
+  ],
+  "/BackendStack/BackendTaskDef/TaskRole/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BackendTaskDefTaskRoleBA953A3B"
+    }
+  ],
+  "/BackendStack/BackendTaskDef/ExecutionRole/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BackendTaskDefExecutionRoleC5A001DB"
+    }
+  ],
+  "/BackendStack/BackendAlb/SecurityGroup/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BackendAlbSecurityGroupFA70C18B"
+    }
+  ],
+  "/BackendStack/BackendAlb/SecurityGroup/to BackendStackServiceSgA2406E94:8000": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BackendAlbSecurityGrouptoBackendStackServiceSgA2406E9480002DE15434"
+    }
+  ],
+  "/BackendStack/BackendAlb/HttpListener/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BackendAlbHttpListener58B160AA"
+    }
+  ],
+  "/BackendStack/BackendTaskDef/TaskRole/DefaultPolicy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BackendTaskDefTaskRoleDefaultPolicy2C657A56"
+    }
+  ],
+  "/BackendStack/BackendTaskDef/ExecutionRole/DefaultPolicy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BackendTaskDefExecutionRoleDefaultPolicyAA625660"
+    }
+  ],
+  "/BackendStack/BackendAlb/HttpListener/BackendTargetGroup/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BackendAlbHttpListenerBackendTargetGroupFD8C31D2"
+    }
+  ]
+}

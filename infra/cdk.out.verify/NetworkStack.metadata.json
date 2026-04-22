@@ -1,0 +1,134 @@
+{
+  "/NetworkStack/Custom::VpcRestrictDefaultSGCustomResourceProvider": [
+    {
+      "type": "aws:cdk:is-custom-resource-handler-customResourceProvider",
+      "data": true
+    }
+  ],
+  "/NetworkStack/VpcId": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "VpcId"
+    }
+  ],
+  "/NetworkStack/BootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BootstrapVersion"
+    }
+  ],
+  "/NetworkStack/CheckBootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CheckBootstrapVersion"
+    }
+  ],
+  "/NetworkStack/SandboxVpc/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "SandboxVpcAAA107BE"
+    }
+  ],
+  "/NetworkStack/SandboxVpc/IGW": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "SandboxVpcIGWBAB9DB24"
+    }
+  ],
+  "/NetworkStack/SandboxVpc/VPCGW": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "SandboxVpcVPCGW77762E77"
+    }
+  ],
+  "/NetworkStack/Custom::VpcRestrictDefaultSGCustomResourceProvider/Role": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CustomVpcRestrictDefaultSGCustomResourceProviderRole26592FE0"
+    }
+  ],
+  "/NetworkStack/Custom::VpcRestrictDefaultSGCustomResourceProvider/Handler": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CustomVpcRestrictDefaultSGCustomResourceProviderHandlerDC833E5E"
+    }
+  ],
+  "/NetworkStack/CDKMetadata/Default": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CDKMetadata"
+    }
+  ],
+  "/NetworkStack/Exports/Output{\"Ref\":\"SandboxVpcAAA107BE\"}": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ExportsOutputRefSandboxVpcAAA107BE8A7837CA"
+    }
+  ],
+  "/NetworkStack/Exports/Output{\"Ref\":\"SandboxVpcPublicSubnet1Subnet3E135B45\"}": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ExportsOutputRefSandboxVpcPublicSubnet1Subnet3E135B45BBC51468"
+    }
+  ],
+  "/NetworkStack/Exports/Output{\"Ref\":\"SandboxVpcPublicSubnet2SubnetA646281F\"}": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ExportsOutputRefSandboxVpcPublicSubnet2SubnetA646281FB50BDA39"
+    }
+  ],
+  "/NetworkStack/SandboxVpc/PublicSubnet1/Subnet": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "SandboxVpcPublicSubnet1Subnet3E135B45"
+    }
+  ],
+  "/NetworkStack/SandboxVpc/PublicSubnet1/RouteTable": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "SandboxVpcPublicSubnet1RouteTable69C7EF67"
+    }
+  ],
+  "/NetworkStack/SandboxVpc/PublicSubnet1/RouteTableAssociation": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "SandboxVpcPublicSubnet1RouteTableAssociation9F0488DE"
+    }
+  ],
+  "/NetworkStack/SandboxVpc/PublicSubnet1/DefaultRoute": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "SandboxVpcPublicSubnet1DefaultRouteD9F9E6C3"
+    }
+  ],
+  "/NetworkStack/SandboxVpc/PublicSubnet2/Subnet": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "SandboxVpcPublicSubnet2SubnetA646281F"
+    }
+  ],
+  "/NetworkStack/SandboxVpc/PublicSubnet2/RouteTable": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "SandboxVpcPublicSubnet2RouteTableD366FA1B"
+    }
+  ],
+  "/NetworkStack/SandboxVpc/PublicSubnet2/RouteTableAssociation": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "SandboxVpcPublicSubnet2RouteTableAssociation2F4744B5"
+    }
+  ],
+  "/NetworkStack/SandboxVpc/PublicSubnet2/DefaultRoute": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "SandboxVpcPublicSubnet2DefaultRoute9152887E"
+    }
+  ],
+  "/NetworkStack/SandboxVpc/RestrictDefaultSecurityGroupCustomResource/Default": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "SandboxVpcRestrictDefaultSecurityGroupCustomResourceA3C9BEF8"
+    }
+  ]
+}
