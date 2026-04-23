@@ -1,0 +1,86 @@
+name: Sandbox Lifecycle
+
+# Pause / Resume / Teardown. All manual.
+#   pause    — scale ECS to 0 + disable CloudFront (~$29/mo saved, ALB stays up)
+#   resume   — reverse of pause
+#   teardown — destroy Backend + Frontend stacks (~$51/mo saved, ~$0.50/mo baseline)
+#              requires typing DESTROY in the confirm input.
+# After teardown, run the "Deploy / Rebuild" workflow with scope=all to rebuild.
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: Lifecycle action
+        type: choice
+        required: true
+        options:
+          - pause
+          - resume
+          - teardown
+      confirm:
+        description: 'Type DESTROY to confirm teardown (ignored for pause/resume)'
+        required: false
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: eu-west-2
+
+jobs:
+  lifecycle:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify teardown confirmation
+        if: inputs.action == 'teardown'
+        run: |
+          if [[ "${{ inputs.confirm }}" != "DESTROY" ]]; then
+            echo "::error::Teardown requires confirm input of DESTROY (got '${{ inputs.confirm }}')."
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+
+      - name: Setup Node (teardown only)
+        if: inputs.action == 'teardown'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: infra/package-lock.json
+
+      - name: Install infra dependencies (teardown only)
+        if: inputs.action == 'teardown'
+        run: npm ci
+        working-directory: infra
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Pause
+        if: inputs.action == 'pause'
+        env:
+          ECS_CLUSTER_NAME: ${{ vars.ECS_CLUSTER_NAME }}
+          ECS_SERVICE_NAME: ${{ vars.ECS_SERVICE_NAME }}
+          CLOUDFRONT_DISTRIBUTION_ID: ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}
+        run: ./scripts/sandbox-pause.sh pause
+
+      - name: Resume
+        if: inputs.action == 'resume'
+        env:
+          ECS_CLUSTER_NAME: ${{ vars.ECS_CLUSTER_NAME }}
+          ECS_SERVICE_NAME: ${{ vars.ECS_SERVICE_NAME }}
+          CLOUDFRONT_DISTRIBUTION_ID: ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}
+        run: ./scripts/sandbox-pause.sh resume
+
+      - name: Teardown
+        if: inputs.action == 'teardown'
+        env:
+          SKIP_CONFIRM: 'true'
+        run: ./scripts/sandbox-teardown.sh

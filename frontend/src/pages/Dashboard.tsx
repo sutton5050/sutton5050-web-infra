@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Navigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthProvider';
 import apiClient from '../api/client';
 
@@ -9,13 +10,15 @@ interface PingResult {
 }
 
 export function Dashboard() {
-  const { user, logout } = useAuth();
+  const { isAuthenticated, logout } = useAuth();
   const [pingResult, setPingResult] = useState<PingResult | null>(null);
   const [pingError, setPingError] = useState<string | null>(null);
   const [pinging, setPinging] = useState(false);
   const [backendStatus, setBackendStatus] = useState<'unknown' | 'up' | 'down'>('unknown');
 
-  const email = user?.profile?.email ?? 'Unknown';
+  if (!isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
 
   const handlePing = async () => {
     setPinging(true);
@@ -39,7 +42,6 @@ export function Dashboard() {
       <nav className="nav">
         <span className="nav-brand">sutton5050</span>
         <div className="nav-right">
-          <span className="nav-email">{email}</span>
           <button className="nav-link" onClick={logout}>Sign out</button>
         </div>
       </nav>
@@ -86,10 +88,6 @@ export function Dashboard() {
         <div className="status-item">
           <span className="dot" />
           eu-west-2
-        </div>
-        <div className="status-item">
-          <span className="dot" />
-          Cognito
         </div>
         <div className="status-item">
           <span className="dot" />

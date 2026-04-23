@@ -16,8 +16,8 @@ set -euo pipefail
 #   - DnsStack       (Route53 hosted zone ref — $0.50/mo)
 #   - GlobalCertStack (ACM cert — free)
 #   - NetworkStack   (VPC — free, no NAT)
-#   - AuthStack      (Cognito — free <50K MAU, holds users)
 #   - StorageStack   (DynamoDB + S3 + ECR — pennies, holds data)
+#   - OidcStack      (IAM role for GitHub Actions — free)
 #
 # To rebuild:
 #   npx cdk deploy BackendStack FrontendStack --require-approval broadening
@@ -34,8 +34,8 @@ echo "  • BackendStack  (ECS, ALB, API Gateway, VPC Link)"
 echo "  • FrontendStack (CloudFront, S3 frontend bucket)"
 echo ""
 echo "These are preserved (free, hold state):"
-echo "  • DnsStack, GlobalCertStack, NetworkStack"
-echo "  • AuthStack (Cognito users), StorageStack (DynamoDB data, S3 files, ECR images)"
+echo "  • DnsStack, GlobalCertStack, NetworkStack, OidcStack"
+echo "  • StorageStack (DynamoDB data, S3 files, ECR images)"
 echo ""
 
 if [[ "$SKIP_CONFIRM" != "true" ]]; then

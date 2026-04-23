@@ -4,11 +4,8 @@ import * as ecs from 'aws-cdk-lib/aws-ecs';
 import * as ecr from 'aws-cdk-lib/aws-ecr';
 import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import * as logs from 'aws-cdk-lib/aws-logs';
-import * as iam from 'aws-cdk-lib/aws-iam';
 import * as acm from 'aws-cdk-lib/aws-certificatemanager';
 import * as route53 from 'aws-cdk-lib/aws-route53';
-import * as route53targets from 'aws-cdk-lib/aws-route53-targets';
-import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as apigwv2 from 'aws-cdk-lib/aws-apigatewayv2';
@@ -17,12 +14,12 @@ import { Construct } from 'constructs';
 export interface BackendStackProps extends cdk.StackProps {
   domainName: string;
   vpc: ec2.IVpc;
-  userPool: cognito.IUserPool;
-  userPoolClient: cognito.IUserPoolClient;
   table: dynamodb.ITable;
   storageBucket: s3.IBucket;
   ecrRepository: ecr.IRepository;
   hostedZone: route53.IHostedZone;
+  sandboxUsername: string;
+  sandboxPassword: string;
 }
 
 export class BackendStack extends cdk.Stack {
@@ -34,10 +31,8 @@ export class BackendStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: BackendStackProps) {
     super(scope, id, props);
 
-    // ECR Repository — created in StorageStack, passed in as prop
     const repo = props.ecrRepository;
 
-    // ECS Cluster
     const cluster = new ecs.Cluster(this, 'BackendCluster', {
       clusterName: 'sutton5050-cluster',
       vpc: props.vpc,
@@ -45,13 +40,11 @@ export class BackendStack extends cdk.Stack {
     });
     this.ecsCluster = cluster;
 
-    // Task Definition
     const taskDef = new ecs.FargateTaskDefinition(this, 'BackendTaskDef', {
       cpu: 256,
       memoryLimitMiB: 512,
     });
 
-    // Grant DynamoDB + S3 access to task role
     props.table.grantReadWriteData(taskDef.taskRole);
     props.storageBucket.grantReadWrite(taskDef.taskRole);
 
@@ -69,24 +62,22 @@ export class BackendStack extends cdk.Stack {
         AWS_DEFAULT_REGION: this.region,
         DYNAMODB_TABLE_NAME: props.table.tableName,
         S3_BUCKET_NAME: props.storageBucket.bucketName,
-        COGNITO_USER_POOL_ID: props.userPool.userPoolId,
-        COGNITO_APP_CLIENT_ID: props.userPoolClient.userPoolClientId,
-        COGNITO_REGION: this.region,
+        CORS_ORIGIN: `https://${props.domainName}`,
+        SANDBOX_USERNAME: props.sandboxUsername,
+        // Plain env var. Sandbox-only — upgrade to Secrets Manager if this
+        // ever protects non-experimental data.
+        SANDBOX_PASSWORD: props.sandboxPassword,
       },
-      // Health check handled by ALB target group — no container-level check needed
     });
 
     container.addPortMappings({ containerPort: 8000 });
 
-    // Security Group for Fargate tasks
     const serviceSg = new ec2.SecurityGroup(this, 'ServiceSg', {
       vpc: props.vpc,
       description: 'Backend Fargate service',
       allowAllOutbound: true,
     });
 
-    // Fargate Service — use on-demand FARGATE for reliable initial deployment.
-    // FARGATE_SPOT can be re-added once the service is stable.
     const service = new ecs.FargateService(this, 'BackendService', {
       serviceName: 'sutton5050-backend',
       cluster,
@@ -103,8 +94,6 @@ export class BackendStack extends cdk.Stack {
     });
     this.ecsService = service;
 
-    // ALB in front of Fargate (internet-facing since VPC has public subnets only;
-    // API Gateway + JWT authorizer is the security boundary, not the ALB)
     const alb = new elbv2.ApplicationLoadBalancer(this, 'BackendAlb', {
       vpc: props.vpc,
       internetFacing: true,
@@ -130,7 +119,6 @@ export class BackendStack extends cdk.Stack {
       },
     });
 
-    // Allow ALB to reach Fargate
     serviceSg.addIngressRule(
       ec2.Peer.securityGroupId(alb.connections.securityGroups[0].securityGroupId),
       ec2.Port.tcp(8000),
@@ -143,7 +131,7 @@ export class BackendStack extends cdk.Stack {
       validation: acm.CertificateValidation.fromDns(props.hostedZone),
     });
 
-    // HTTP API Gateway
+    // HTTP API Gateway — no JWT authorizer anymore; FastAPI enforces Basic Auth itself.
     const httpApi = new apigwv2.CfnApi(this, 'HttpApi', {
       name: 'sutton5050-api',
       protocolType: 'HTTP',
@@ -155,7 +143,6 @@ export class BackendStack extends cdk.Stack {
       },
     });
 
-    // Custom domain for API Gateway
     const apiDomainName = new apigwv2.CfnDomainName(this, 'ApiDomainName', {
       domainName: `api.${props.domainName}`,
       domainNameConfigurations: [
@@ -166,26 +153,12 @@ export class BackendStack extends cdk.Stack {
       ],
     });
 
-    // VPC Link for API GW → ALB
     const vpcLink = new apigwv2.CfnVpcLink(this, 'VpcLink', {
       name: 'sutton5050-vpc-link',
       subnetIds: props.vpc.publicSubnets.map(s => s.subnetId),
       securityGroupIds: [alb.connections.securityGroups[0].securityGroupId],
     });
 
-    // JWT Authorizer using Cognito
-    const authorizer = new apigwv2.CfnAuthorizer(this, 'CognitoAuthorizer', {
-      apiId: httpApi.ref,
-      name: 'cognito-jwt',
-      authorizerType: 'JWT',
-      identitySource: ['$request.header.Authorization'],
-      jwtConfiguration: {
-        issuer: `https://cognito-idp.${this.region}.amazonaws.com/${props.userPool.userPoolId}`,
-        audience: [props.userPoolClient.userPoolClientId],
-      },
-    });
-
-    // Integration — HTTP_PROXY to ALB via VPC Link
     const integration = new apigwv2.CfnIntegration(this, 'AlbIntegration', {
       apiId: httpApi.ref,
       integrationType: 'HTTP_PROXY',
@@ -196,38 +169,27 @@ export class BackendStack extends cdk.Stack {
       payloadFormatVersion: '1.0',
     });
 
-    // Default route with JWT authorizer
+    // All routes pass through unauthenticated at the API GW layer.
+    // FastAPI middleware rejects anything without valid Basic Auth.
     new apigwv2.CfnRoute(this, 'DefaultRoute', {
       apiId: httpApi.ref,
       routeKey: '$default',
       target: `integrations/${integration.ref}`,
-      authorizationType: 'JWT',
-      authorizerId: authorizer.ref,
-    });
-
-    // Health check route without auth
-    new apigwv2.CfnRoute(this, 'HealthRoute', {
-      apiId: httpApi.ref,
-      routeKey: 'GET /health',
-      target: `integrations/${integration.ref}`,
       authorizationType: 'NONE',
     });
 
-    // Stage
     new apigwv2.CfnStage(this, 'ApiStage', {
       apiId: httpApi.ref,
       stageName: '$default',
       autoDeploy: true,
     });
 
-    // Map custom domain to API
     new apigwv2.CfnApiMapping(this, 'ApiMapping', {
       apiId: httpApi.ref,
       domainName: `api.${props.domainName}`,
       stage: '$default',
     }).addDependency(apiDomainName);
 
-    // Route53 record for api.{domain}
     new route53.CnameRecord(this, 'ApiDnsRecord', {
       zone: props.hostedZone,
       recordName: `api.${props.domainName}`,

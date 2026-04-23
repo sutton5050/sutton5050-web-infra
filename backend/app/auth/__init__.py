@@ -1,3 +1,3 @@
-from app.auth.cognito import get_current_user, CognitoUser
+from app.auth.basic import SandboxUser, require_auth
 
-__all__ = ["get_current_user", "CognitoUser"]
+__all__ = ["SandboxUser", "require_auth"]

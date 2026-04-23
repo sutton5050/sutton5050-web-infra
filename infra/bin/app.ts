@@ -3,7 +3,6 @@ import * as cdk from 'aws-cdk-lib';
 import { DnsStack } from '../lib/dns-stack';
 import { GlobalCertStack } from '../lib/global-cert-stack';
 import { NetworkStack } from '../lib/network-stack';
-import { AuthStack } from '../lib/auth-stack';
 import { StorageStack } from '../lib/storage-stack';
 import { BackendStack } from '../lib/backend-stack';
 import { FrontendStack } from '../lib/frontend-stack';
@@ -28,6 +27,13 @@ const usEast1Env: cdk.Environment = {
   region: 'us-east-1',
 };
 
+// Shared-secret Basic Auth — password sourced from env or CDK context.
+// `SANDBOX_PASSWORD` env wins; falls back to `-c sandboxPassword=…` context;
+// only set to empty when synthesising in CI (e.g. cdk diff).
+const sandboxUsername = app.node.tryGetContext('sandboxUsername') ?? 'sandbox';
+const sandboxPassword =
+  process.env.SANDBOX_PASSWORD ?? app.node.tryGetContext('sandboxPassword') ?? '';
+
 // DNS — reference existing hosted zone
 const dnsStack = new DnsStack(app, 'DnsStack', {
   domainName,
@@ -49,16 +55,6 @@ const networkStack = new NetworkStack(app, 'NetworkStack', {
   env: primaryEnv,
 });
 
-// Cognito — needs the us-east-1 wildcard cert ARN for custom domain
-// After deploying GlobalCertStack, set cognitoCertArn in cdk.json
-const cognitoCertArn = app.node.tryGetContext('cognitoCertArn');
-const authStack = new AuthStack(app, 'AuthStack', {
-  domainName,
-  hostedZone: dnsStack.hostedZone,
-  cognitoCertArn,
-  env: primaryEnv,
-});
-
 // DynamoDB + S3
 const storageStack = new StorageStack(app, 'StorageStack', {
   domainName,
@@ -69,12 +65,12 @@ const storageStack = new StorageStack(app, 'StorageStack', {
 const backendStack = new BackendStack(app, 'BackendStack', {
   domainName,
   vpc: networkStack.vpc,
-  userPool: authStack.userPool,
-  userPoolClient: authStack.userPoolClient,
   table: storageStack.table,
   storageBucket: storageStack.storageBucket,
   ecrRepository: storageStack.ecrRepository,
   hostedZone: dnsStack.hostedZone,
+  sandboxUsername,
+  sandboxPassword,
   env: primaryEnv,
 });
 

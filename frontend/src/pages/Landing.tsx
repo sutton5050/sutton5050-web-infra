@@ -1,24 +1,27 @@
+import { useState, type FormEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthProvider';
-import { Navigate } from 'react-router-dom';
 
 export function Landing() {
-  const { isAuthenticated, isLoading, login } = useAuth();
-
-  if (isLoading) {
-    return <div className="loading">Loading...</div>;
-  }
+  const { login, isAuthenticated } = useAuth();
+  const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
   if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
+    navigate('/dashboard', { replace: true });
   }
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    if (!password) return;
+    login(password);
+    navigate('/dashboard', { replace: true });
+  };
 
   return (
     <>
       <nav className="nav">
         <span className="nav-brand">sutton5050</span>
-        <button className="nav-link" onClick={login}>
-          Sign in
-        </button>
       </nav>
       <section className="hero">
         <p className="hero-overtitle">Sandbox Environment</p>
@@ -27,12 +30,22 @@ export function Landing() {
           A serverless platform on AWS for rapid application development
           and experimentation.
         </p>
-        <button className="hero-cta" onClick={login}>
-          Get started
-          <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M1 7h12m0 0L8 2m5 5L8 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
+        <form className="login-form" onSubmit={handleSubmit}>
+          <input
+            type="password"
+            placeholder="Sandbox password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoFocus
+            aria-label="Sandbox password"
+          />
+          <button type="submit" className="hero-cta" disabled={!password}>
+            Enter
+            <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M1 7h12m0 0L8 2m5 5L8 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+        </form>
       </section>
     </>
   );

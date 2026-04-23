@@ -18,7 +18,6 @@ set -euo pipefail
 #   Route53 hosted zone        $0.50/mo (fixed)
 #   DynamoDB on-demand         $0 idle
 #   S3 buckets                 pennies
-#   Cognito User Pool          free (<50K MAU)
 #   API Gateway HTTP API       $0 idle (per-request only)
 #   ACM certificates           free
 #   CloudFront distribution    ~$0 idle
@@ -82,7 +81,7 @@ json.dump(config, sys.stdout)
   echo "✓ Sandbox paused."
   echo ""
   echo "  Stopped:    ECS tasks, CloudFront"
-  echo "  Still up:   ALB, API GW, VPC, Cognito, DynamoDB, S3, Route53"
+  echo "  Still up:   ALB, API GW, VPC, DynamoDB, S3, Route53"
   echo ""
   echo "  Note: The ALB (~\$16/mo) stays up so BackendStack doesn't"
   echo "  need a full redeploy on resume. Delete BackendStack entirely"

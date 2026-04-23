@@ -7,7 +7,7 @@ import boto3
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.auth import CognitoUser, get_current_user
+from app.auth import SandboxUser, require_auth
 from app.routers import sessions
 
 logger = logging.getLogger("uvicorn.error")
@@ -44,7 +44,7 @@ async def health():
 
 
 @app.get("/ping")
-async def ping(user: CognitoUser = Depends(get_current_user)):
+async def ping(user: SandboxUser = Depends(require_auth)):
     now = datetime.now(timezone.utc).isoformat()
     logger.info(f">>> PING from user={user.email} sub={user.sub} at {now}")
     return {

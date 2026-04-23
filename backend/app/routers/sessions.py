@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 
-from app.auth import CognitoUser, get_current_user
+from app.auth import SandboxUser, require_auth
 from app.models.session import SessionCreate, SessionList, SessionResponse
 from app.services.dynamo import delete_session, get_session, list_sessions, put_session
 
@@ -11,7 +11,7 @@ router = APIRouter(prefix="/sessions", tags=["sessions"])
 async def create(
     body: SessionCreate,
     request: Request,
-    user: CognitoUser = Depends(get_current_user),
+    user: SandboxUser = Depends(require_auth),
 ):
     item = put_session(request.app.state.table, user.sub, body.metadata)
     return SessionResponse(
@@ -25,7 +25,7 @@ async def create(
 @router.get("/", response_model=SessionList)
 async def list_all(
     request: Request,
-    user: CognitoUser = Depends(get_current_user),
+    user: SandboxUser = Depends(require_auth),
 ):
     items = list_sessions(request.app.state.table, user.sub)
     sessions = [
@@ -44,7 +44,7 @@ async def list_all(
 async def get_one(
     session_id: str,
     request: Request,
-    user: CognitoUser = Depends(get_current_user),
+    user: SandboxUser = Depends(require_auth),
 ):
     item = get_session(request.app.state.table, user.sub, session_id)
     if not item:
@@ -61,6 +61,6 @@ async def get_one(
 async def delete(
     session_id: str,
     request: Request,
-    user: CognitoUser = Depends(get_current_user),
+    user: SandboxUser = Depends(require_auth),
 ):
     delete_session(request.app.state.table, user.sub, session_id)
