@@ -21,14 +21,14 @@ export function Landing() {
   return (
     <>
       <nav className="nav">
-        <span className="nav-brand">sutton5050</span>
+        <span className="nav-brand">FPL Viewer</span>
       </nav>
       <section className="hero">
-        <p className="hero-overtitle">Sandbox Environment</p>
-        <h1>Build anything. Experiment freely.</h1>
+        <p className="hero-overtitle">Fantasy Premier League</p>
+        <h1>Any player. Any gameweek.</h1>
         <p className="hero-subtitle">
-          A serverless platform on AWS for rapid application development
-          and experimentation.
+          Live stats pulled straight from the FPL API. Sign in with the
+          sandbox password to look up per-gameweek performance.
         </p>
         <form className="login-form" onSubmit={handleSubmit}>
           <input

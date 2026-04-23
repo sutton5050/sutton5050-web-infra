@@ -319,3 +319,153 @@
     padding: 28px 20px;
   }
 }
+
+/* ─── Landing login form ─── */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  max-width: 320px;
+}
+
+.login-form input {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 15px;
+  font-family: var(--sf);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.login-form input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* ─── FPL form ─── */
+.fpl-card {
+  max-width: 640px;
+  text-align: left;
+}
+
+.fpl-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.fpl-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.fpl-field input,
+.fpl-field select {
+  padding: 10px 14px;
+  font-size: 15px;
+  font-family: var(--sf);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.fpl-field input:focus,
+.fpl-field select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* ─── Match disambiguation list ─── */
+.match-list {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.match-list-heading {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.match-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.match-item {
+  width: 100%;
+  text-align: left;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-family: var(--sf);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.match-item:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.match-item:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ─── Stats result table ─── */
+.stats-result {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.stats-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+
+.stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--sf-mono);
+  font-size: 13px;
+}
+
+.stats-table tr {
+  border-bottom: 0.5px solid var(--border);
+}
+
+.stats-table tr:last-child {
+  border-bottom: none;
+}
+
+.stats-table th {
+  text-align: left;
+  font-weight: 400;
+  color: var(--text-secondary);
+  padding: 8px 12px 8px 0;
+}
+
+.stats-table td {
+  text-align: right;
+  color: var(--text);
+  padding: 8px 0;
+  font-variant-numeric: tabular-nums;
+}

@@ -2,6 +2,9 @@
 
 Full-stack serverless AWS sandbox. React frontend on CloudFront/S3, FastAPI backend on ECS Fargate behind API Gateway, shared-secret Basic Auth.
 
+**Current app:** FPL Gameweek Viewer — look up any Fantasy Premier League
+player's stats for any gameweek, pulled live from the public FPL API.
+
 ## Project structure
 
 ```
@@ -35,6 +38,16 @@ SETUP.md            One-time GitHub Actions setup
 6. **FrontendStack** — S3 + CloudFront
 7. **OidcStack** — GitHub OIDC provider + IAM role for workflows
 
+## App: FPL Gameweek Viewer
+
+- **Frontend** (`frontend/src/pages/Dashboard.tsx`) — form with player name + gameweek dropdown. Submit → fetch → render stat table. Disambiguation list if the name matches multiple players.
+- **Backend** (`backend/app/routers/fpl.py`) — three routes, all behind Basic Auth:
+  - `GET /fpl/bootstrap` — current gameweek, total gameweeks, team list
+  - `GET /fpl/players?q=<query>` — case-insensitive substring match, top 10
+  - `GET /fpl/players/{id}/gameweek/{gw}` — 28-row stat table for that player in that GW
+- **Service** (`backend/app/services/fpl.py`) — httpx client for `https://fantasy.premierleague.com/api`, with a 1-hour in-memory cache on the bootstrap blob (~1MB).
+- **No DynamoDB** — all data is read-through from the FPL API. `StorageStack` is still deployed and available if a future feature needs it.
+
 ## Auth
 
 Shared-secret HTTP Basic Auth. Password lives in:
@@ -50,7 +63,7 @@ FastAPI middleware (`backend/app/auth/basic.py`) checks the header on every rout
 - **ECR repo:** 902672427642.dkr.ecr.eu-west-2.amazonaws.com/sutton5050-backend
 - **Frontend bucket:** sutton5050-frontend-902672427642
 - **CloudFront distribution:** E357OFMOGZYTM2
-- **DynamoDB table:** sutton5050-app
+- **DynamoDB table:** sutton5050-app (unused by current app, reserved for future)
 
 ## Commands
 
