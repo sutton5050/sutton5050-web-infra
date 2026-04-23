@@ -7,6 +7,18 @@ FPL_BASE = "https://fantasy.premierleague.com/api"
 BOOTSTRAP_URL = f"{FPL_BASE}/bootstrap-static/"
 PLAYER_URL = f"{FPL_BASE}/element-summary/{{player_id}}/"
 
+# FPL's edge (Cloudflare) blocks the default httpx User-Agent as a bot.
+# Spoofing a desktop browser UA is the standard workaround.
+_FPL_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/124.0.0.0 Safari/537.36"
+    ),
+    "Accept": "application/json, text/plain, */*",
+    "Accept-Language": "en-GB,en;q=0.9",
+}
+
 POSITION_MAP = {1: "GKP", 2: "DEF", 3: "MID", 4: "FWD"}
 
 # Bootstrap response is ~1MB and changes maybe once per GW. An hour TTL is
@@ -28,7 +40,7 @@ async def get_bootstrap() -> dict[str, Any]:
         return _bootstrap_cache
 
     try:
-        async with httpx.AsyncClient(timeout=10) as client:
+        async with httpx.AsyncClient(timeout=10, headers=_FPL_HEADERS) as client:
             resp = await client.get(BOOTSTRAP_URL)
             resp.raise_for_status()
     except (httpx.RequestError, httpx.HTTPStatusError) as exc:
@@ -41,7 +53,7 @@ async def get_bootstrap() -> dict[str, Any]:
 
 async def get_player_history(player_id: int) -> list[dict[str, Any]]:
     try:
-        async with httpx.AsyncClient(timeout=10) as client:
+        async with httpx.AsyncClient(timeout=10, headers=_FPL_HEADERS) as client:
             resp = await client.get(PLAYER_URL.format(player_id=player_id))
             resp.raise_for_status()
     except (httpx.RequestError, httpx.HTTPStatusError) as exc:
