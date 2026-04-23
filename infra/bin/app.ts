@@ -7,6 +7,7 @@ import { AuthStack } from '../lib/auth-stack';
 import { StorageStack } from '../lib/storage-stack';
 import { BackendStack } from '../lib/backend-stack';
 import { FrontendStack } from '../lib/frontend-stack';
+import { OidcStack } from '../lib/oidc-stack';
 
 const app = new cdk.App();
 
@@ -84,6 +85,15 @@ const frontendStack = new FrontendStack(app, 'FrontendStack', {
   hostedZone: dnsStack.hostedZone,
   env: primaryEnv,
   crossRegionReferences: true,
+});
+
+// GitHub OIDC provider + IAM role assumed by Actions workflows
+const githubOrg = app.node.tryGetContext('githubOrg') ?? 'sutton5050';
+const githubRepo = app.node.tryGetContext('githubRepo') ?? 'sutton5050-web-infra';
+const oidcStack = new OidcStack(app, 'OidcStack', {
+  githubOrg,
+  githubRepo,
+  env: primaryEnv,
 });
 
 app.synth();

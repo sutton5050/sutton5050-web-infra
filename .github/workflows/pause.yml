@@ -1,0 +1,35 @@
+name: Pause Sandbox
+
+# Scales ECS service to 0 tasks and disables the CloudFront distribution.
+# Keeps the ALB running so Backend/FrontendStack don't need redeploy.
+# Saves ~$29/mo. Use teardown.yml for deeper savings.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: eu-west-2
+
+jobs:
+  pause:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Pause sandbox
+        env:
+          AWS_REGION: ${{ env.AWS_REGION }}
+          ECS_CLUSTER_NAME: ${{ vars.ECS_CLUSTER_NAME }}
+          ECS_SERVICE_NAME: ${{ vars.ECS_SERVICE_NAME }}
+          CLOUDFRONT_DISTRIBUTION_ID: ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}
+        run: ./scripts/sandbox-pause.sh pause

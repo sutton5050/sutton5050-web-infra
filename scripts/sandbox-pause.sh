@@ -31,10 +31,10 @@ set -euo pipefail
 #   ./scripts/sandbox-resume.sh         # scale up / resume
 # ─────────────────────────────────────────────────────────────
 
-REGION="eu-west-2"
-CLUSTER="sutton5050-cluster"
-SERVICE="sutton5050-backend"
-CLOUDFRONT_ID="E357OFMOGZYTM2"
+REGION="${AWS_REGION:-eu-west-2}"
+CLUSTER="${ECS_CLUSTER_NAME:-sutton5050-cluster}"
+SERVICE="${ECS_SERVICE_NAME:-sutton5050-backend}"
+CLOUDFRONT_ID="${CLOUDFRONT_DISTRIBUTION_ID:-E357OFMOGZYTM2}"
 
 ACTION="${1:-pause}"
 

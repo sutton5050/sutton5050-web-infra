@@ -24,7 +24,8 @@ set -euo pipefail
 #   Then push backend image + frontend assets.
 # ─────────────────────────────────────────────────────────────
 
-REGION="eu-west-2"
+REGION="${AWS_REGION:-eu-west-2}"
+SKIP_CONFIRM="${SKIP_CONFIRM:-false}"
 
 echo "🗑  Full teardown of paid stacks..."
 echo ""
@@ -36,12 +37,14 @@ echo "These are preserved (free, hold state):"
 echo "  • DnsStack, GlobalCertStack, NetworkStack"
 echo "  • AuthStack (Cognito users), StorageStack (DynamoDB data, S3 files, ECR images)"
 echo ""
-read -p "Continue? [y/N] " -n 1 -r
-echo ""
 
-if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-  echo "Aborted."
-  exit 0
+if [[ "$SKIP_CONFIRM" != "true" ]]; then
+  read -p "Continue? [y/N] " -n 1 -r
+  echo ""
+  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo "Aborted."
+    exit 0
+  fi
 fi
 
 echo ""
