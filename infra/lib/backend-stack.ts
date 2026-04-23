@@ -4,11 +4,8 @@ import * as ecs from 'aws-cdk-lib/aws-ecs';
 import * as ecr from 'aws-cdk-lib/aws-ecr';
 import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import * as logs from 'aws-cdk-lib/aws-logs';
-import * as acm from 'aws-cdk-lib/aws-certificatemanager';
-import * as route53 from 'aws-cdk-lib/aws-route53';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as s3 from 'aws-cdk-lib/aws-s3';
-import * as apigwv2 from 'aws-cdk-lib/aws-apigatewayv2';
 import { Construct } from 'constructs';
 
 export interface BackendStackProps extends cdk.StackProps {
@@ -17,21 +14,20 @@ export interface BackendStackProps extends cdk.StackProps {
   table: dynamodb.ITable;
   storageBucket: s3.IBucket;
   ecrRepository: ecr.IRepository;
-  hostedZone: route53.IHostedZone;
   sandboxUsername: string;
   sandboxPassword: string;
 }
 
+// ECS Fargate + ALB. No API Gateway — CloudFront fronts the ALB directly
+// (added in FrontendStack) so frontend and API share the same origin.
 export class BackendStack extends cdk.Stack {
-  public readonly ecrRepository: ecr.IRepository;
   public readonly ecsCluster: ecs.ICluster;
   public readonly ecsService: ecs.FargateService;
-  public readonly apiUrl: string;
+  public readonly alb: elbv2.IApplicationLoadBalancer;
+  public readonly albDnsName: string;
 
   constructor(scope: Construct, id: string, props: BackendStackProps) {
     super(scope, id, props);
-
-    const repo = props.ecrRepository;
 
     const cluster = new ecs.Cluster(this, 'BackendCluster', {
       clusterName: 'sutton5050-cluster',
@@ -49,7 +45,7 @@ export class BackendStack extends cdk.Stack {
     props.storageBucket.grantReadWrite(taskDef.taskRole);
 
     const container = taskDef.addContainer('backend', {
-      image: ecs.ContainerImage.fromEcrRepository(repo, 'latest'),
+      image: ecs.ContainerImage.fromEcrRepository(props.ecrRepository, 'latest'),
       logging: ecs.LogDrivers.awsLogs({
         streamPrefix: 'backend',
         logGroup: new logs.LogGroup(this, 'BackendLogs', {
@@ -62,14 +58,12 @@ export class BackendStack extends cdk.Stack {
         AWS_DEFAULT_REGION: this.region,
         DYNAMODB_TABLE_NAME: props.table.tableName,
         S3_BUCKET_NAME: props.storageBucket.bucketName,
-        CORS_ORIGIN: `https://${props.domainName}`,
+        // Same-origin setup, so CORS only matters for local dev at localhost:5173.
+        CORS_ORIGIN: 'http://localhost:5173',
         SANDBOX_USERNAME: props.sandboxUsername,
-        // Plain env var. Sandbox-only — upgrade to Secrets Manager if this
-        // ever protects non-experimental data.
         SANDBOX_PASSWORD: props.sandboxPassword,
       },
     });
-
     container.addPortMappings({ containerPort: 8000 });
 
     const serviceSg = new ec2.SecurityGroup(this, 'ServiceSg', {
@@ -100,6 +94,8 @@ export class BackendStack extends cdk.Stack {
       loadBalancerName: 'sutton5050-backend-alb',
       vpcSubnets: { subnetType: ec2.SubnetType.PUBLIC },
     });
+    this.alb = alb;
+    this.albDnsName = alb.loadBalancerDnsName;
 
     const listener = alb.addListener('HttpListener', {
       port: 80,
@@ -125,82 +121,7 @@ export class BackendStack extends cdk.Stack {
       'Allow ALB to backend',
     );
 
-    // Regional ACM cert for API Gateway
-    const apiCert = new acm.Certificate(this, 'ApiCert', {
-      domainName: `api.${props.domainName}`,
-      validation: acm.CertificateValidation.fromDns(props.hostedZone),
-    });
-
-    // HTTP API Gateway — no JWT authorizer anymore; FastAPI enforces Basic Auth itself.
-    const httpApi = new apigwv2.CfnApi(this, 'HttpApi', {
-      name: 'sutton5050-api',
-      protocolType: 'HTTP',
-      corsConfiguration: {
-        allowHeaders: ['Authorization', 'Content-Type'],
-        allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-        allowOrigins: [`https://${props.domainName}`, 'http://localhost:5173'],
-        maxAge: 3600,
-      },
-    });
-
-    const apiDomainName = new apigwv2.CfnDomainName(this, 'ApiDomainName', {
-      domainName: `api.${props.domainName}`,
-      domainNameConfigurations: [
-        {
-          certificateArn: apiCert.certificateArn,
-          endpointType: 'REGIONAL',
-        },
-      ],
-    });
-
-    const vpcLink = new apigwv2.CfnVpcLink(this, 'VpcLink', {
-      name: 'sutton5050-vpc-link',
-      subnetIds: props.vpc.publicSubnets.map(s => s.subnetId),
-      securityGroupIds: [alb.connections.securityGroups[0].securityGroupId],
-    });
-
-    const integration = new apigwv2.CfnIntegration(this, 'AlbIntegration', {
-      apiId: httpApi.ref,
-      integrationType: 'HTTP_PROXY',
-      integrationUri: listener.listenerArn,
-      integrationMethod: 'ANY',
-      connectionType: 'VPC_LINK',
-      connectionId: vpcLink.ref,
-      payloadFormatVersion: '1.0',
-    });
-
-    // All routes pass through unauthenticated at the API GW layer.
-    // FastAPI middleware rejects anything without valid Basic Auth.
-    new apigwv2.CfnRoute(this, 'DefaultRoute', {
-      apiId: httpApi.ref,
-      routeKey: '$default',
-      target: `integrations/${integration.ref}`,
-      authorizationType: 'NONE',
-    });
-
-    new apigwv2.CfnStage(this, 'ApiStage', {
-      apiId: httpApi.ref,
-      stageName: '$default',
-      autoDeploy: true,
-    });
-
-    new apigwv2.CfnApiMapping(this, 'ApiMapping', {
-      apiId: httpApi.ref,
-      domainName: `api.${props.domainName}`,
-      stage: '$default',
-    }).addDependency(apiDomainName);
-
-    new route53.CnameRecord(this, 'ApiDnsRecord', {
-      zone: props.hostedZone,
-      recordName: `api.${props.domainName}`,
-      domainName: apiDomainName.attrRegionalDomainName,
-      ttl: cdk.Duration.minutes(5),
-    });
-
-    this.apiUrl = `https://api.${props.domainName}`;
-
-    new cdk.CfnOutput(this, 'ApiUrl', { value: this.apiUrl });
-    new cdk.CfnOutput(this, 'EcrRepoUri', { value: repo.repositoryUri });
+    new cdk.CfnOutput(this, 'AlbDnsName', { value: alb.loadBalancerDnsName });
     new cdk.CfnOutput(this, 'ClusterName', { value: cluster.clusterName });
     new cdk.CfnOutput(this, 'ServiceName', { value: service.serviceName });
   }

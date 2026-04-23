@@ -1,10 +1,10 @@
 import axios from 'axios';
 import { getStoredCredentials, clearStoredCredentials } from '../auth/AuthProvider';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-
+// Same-origin — CloudFront routes /api/* to the ALB, so a relative baseURL
+// keeps the browser sending requests to sutton5050.com (no CORS).
 const apiClient = axios.create({
-  baseURL: API_URL,
+  baseURL: '/api',
   headers: { 'Content-Type': 'application/json' },
 });
 

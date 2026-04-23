@@ -121,7 +121,6 @@ jobs:
         if: env.SCOPE == 'all' || env.SCOPE == 'frontend'
         working-directory: frontend
         env:
-          VITE_API_URL: ${{ vars.VITE_API_URL }}
           VITE_APP_DOMAIN: ${{ vars.VITE_APP_DOMAIN }}
         run: npm run build
 
