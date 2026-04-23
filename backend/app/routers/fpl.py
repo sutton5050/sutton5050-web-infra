@@ -74,13 +74,4 @@ async def player_gameweek(
             ),
         )
 
-    return {
-        "player": {
-            "id": player["id"],
-            "first_name": player.get("first_name", ""),
-            "second_name": player.get("second_name", ""),
-            "web_name": player.get("web_name", ""),
-        },
-        "gameweek": gameweek,
-        "stats": fpl_service.build_stat_rows(player, gw_entry, bootstrap),
-    }
+    return fpl_service.build_game_report(player, gw_entry, bootstrap)

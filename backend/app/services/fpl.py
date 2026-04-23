@@ -21,6 +21,26 @@ _FPL_HEADERS = {
 
 POSITION_MAP = {1: "GKP", 2: "DEF", 3: "MID", 4: "FWD"}
 
+_PHOTO_BASE = "https://resources.premierleague.com/premierleague/photos/players/250x250"
+_CREST_BASE = "https://resources.premierleague.com/premierleague/badges/70"
+
+
+def _photo_url(photo_field: str | None) -> str | None:
+    # FPL stores photo as "174432.jpg" — the public URL uses a 'p' prefix and .png.
+    if not photo_field:
+        return None
+    stem = photo_field.rsplit(".", 1)[0]
+    return f"{_PHOTO_BASE}/p{stem}.png"
+
+
+def _team_info(team: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "id": team.get("id"),
+        "name": team.get("name"),
+        "short_name": team.get("short_name"),
+        "crest_url": f"{_CREST_BASE}/t{team.get('code')}.png" if team.get("code") else None,
+    }
+
 # Bootstrap response is ~1MB and changes maybe once per GW. An hour TTL is
 # plenty to keep the UI snappy without serving badly stale data.
 _BOOTSTRAP_TTL_SECONDS = 3600
@@ -103,44 +123,72 @@ def total_gameweeks(bootstrap: dict[str, Any]) -> int:
     return len(events) or 38
 
 
-def build_stat_rows(
+def _float(value: Any, default: float = 0.0) -> float:
+    try:
+        return float(value) if value is not None else default
+    except (TypeError, ValueError):
+        return default
+
+
+def build_game_report(
     player: dict[str, Any],
     gw_stats: dict[str, Any],
     bootstrap: dict[str, Any],
-) -> list[dict[str, Any]]:
-    teams = {t["id"]: t["name"] for t in bootstrap.get("teams", [])}
-    opponent = teams.get(gw_stats.get("opponent_team"), str(gw_stats.get("opponent_team", "")))
+) -> dict[str, Any]:
+    """Shape a single gameweek into a richer response the frontend can render directly."""
+    teams_by_id = {t["id"]: t for t in bootstrap.get("teams", [])}
+    player_team = teams_by_id.get(player.get("team"), {})
+    opponent_team = teams_by_id.get(gw_stats.get("opponent_team"), {})
     position = POSITION_MAP.get(player.get("element_type"), "UNK")
-    was_home = gw_stats.get("was_home", False)
+    was_home = bool(gw_stats.get("was_home", False))
 
-    return [
-        {"label": "Player", "value": f"{player.get('first_name', '')} {player.get('second_name', '')}"},
-        {"label": "Web Name", "value": player.get("web_name", "")},
-        {"label": "Position", "value": position},
-        {"label": "Team", "value": teams.get(player.get("team"), "")},
-        {"label": "Gameweek", "value": gw_stats.get("round", "")},
-        {"label": "Opponent", "value": opponent},
-        {"label": "Venue", "value": "Home" if was_home else "Away"},
-        {"label": "Minutes Played", "value": gw_stats.get("minutes", 0)},
-        {"label": "Goals Scored", "value": gw_stats.get("goals_scored", 0)},
-        {"label": "Assists", "value": gw_stats.get("assists", 0)},
-        {"label": "Clean Sheets", "value": gw_stats.get("clean_sheets", 0)},
-        {"label": "Goals Conceded", "value": gw_stats.get("goals_conceded", 0)},
-        {"label": "Own Goals", "value": gw_stats.get("own_goals", 0)},
-        {"label": "Penalties Saved", "value": gw_stats.get("penalties_saved", 0)},
-        {"label": "Penalties Missed", "value": gw_stats.get("penalties_missed", 0)},
-        {"label": "Yellow Cards", "value": gw_stats.get("yellow_cards", 0)},
-        {"label": "Red Cards", "value": gw_stats.get("red_cards", 0)},
-        {"label": "Saves", "value": gw_stats.get("saves", 0)},
-        {"label": "Bonus Points", "value": gw_stats.get("bonus", 0)},
-        {"label": "BPS", "value": gw_stats.get("bps", 0)},
-        {"label": "Influence", "value": gw_stats.get("influence", "N/A")},
-        {"label": "Creativity", "value": gw_stats.get("creativity", "N/A")},
-        {"label": "Threat", "value": gw_stats.get("threat", "N/A")},
-        {"label": "ICT Index", "value": gw_stats.get("ict_index", "N/A")},
-        {"label": "xG", "value": gw_stats.get("expected_goals", "N/A")},
-        {"label": "xA", "value": gw_stats.get("expected_assists", "N/A")},
-        {"label": "xGI", "value": gw_stats.get("expected_goal_involvements", "N/A")},
-        {"label": "xGC", "value": gw_stats.get("expected_goals_conceded", "N/A")},
-        {"label": "Total FPL Points", "value": gw_stats.get("total_points", 0)},
-    ]
+    return {
+        "player": {
+            "id": player["id"],
+            "first_name": player.get("first_name", ""),
+            "second_name": player.get("second_name", ""),
+            "web_name": player.get("web_name", ""),
+            "position": position,
+            "photo_url": _photo_url(player.get("photo")),
+            "team": _team_info(player_team),
+        },
+        "gameweek": gw_stats.get("round"),
+        "fixture": {
+            "opponent": _team_info(opponent_team),
+            "was_home": was_home,
+            "venue": "Home" if was_home else "Away",
+        },
+        "summary": {
+            "total_points": int(gw_stats.get("total_points", 0)),
+            "minutes": int(gw_stats.get("minutes", 0)),
+            "starts": int(gw_stats.get("starts", 1 if gw_stats.get("minutes", 0) >= 60 else 0)),
+            "bps": int(gw_stats.get("bps", 0)),
+            "bonus": int(gw_stats.get("bonus", 0)),
+        },
+        "attacking": {
+            "goals": int(gw_stats.get("goals_scored", 0)),
+            "assists": int(gw_stats.get("assists", 0)),
+            "expected_goals": _float(gw_stats.get("expected_goals")),
+            "expected_assists": _float(gw_stats.get("expected_assists")),
+            "expected_goal_involvements": _float(gw_stats.get("expected_goal_involvements")),
+        },
+        "defending": {
+            "clean_sheets": int(gw_stats.get("clean_sheets", 0)),
+            "goals_conceded": int(gw_stats.get("goals_conceded", 0)),
+            "saves": int(gw_stats.get("saves", 0)),
+            "expected_goals_conceded": _float(gw_stats.get("expected_goals_conceded")),
+        },
+        "discipline": {
+            "yellow_cards": int(gw_stats.get("yellow_cards", 0)),
+            "red_cards": int(gw_stats.get("red_cards", 0)),
+            "own_goals": int(gw_stats.get("own_goals", 0)),
+            "penalties_saved": int(gw_stats.get("penalties_saved", 0)),
+            "penalties_missed": int(gw_stats.get("penalties_missed", 0)),
+        },
+        "ict": {
+            "influence": _float(gw_stats.get("influence")),
+            "creativity": _float(gw_stats.get("creativity")),
+            "threat": _float(gw_stats.get("threat")),
+            "ict_index": _float(gw_stats.get("ict_index")),
+        },
+    }

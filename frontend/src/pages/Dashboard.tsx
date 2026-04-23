@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthProvider';
 import apiClient from '../api/client';
+import { GameReport } from '../components/GameReport';
 
 interface Bootstrap {
   current_gameweek: number;
@@ -17,20 +18,62 @@ interface PlayerMatch {
   position: string;
 }
 
-interface StatRow {
-  label: string;
-  value: string | number;
+interface Team {
+  id: number;
+  name: string;
+  short_name: string;
+  crest_url: string | null;
 }
 
-interface GameweekStats {
+export interface GameReportData {
   player: {
     id: number;
     first_name: string;
     second_name: string;
     web_name: string;
+    position: string;
+    photo_url: string | null;
+    team: Team;
   };
   gameweek: number;
-  stats: StatRow[];
+  fixture: {
+    opponent: Team;
+    was_home: boolean;
+    venue: string;
+  };
+  summary: {
+    total_points: number;
+    minutes: number;
+    starts: number;
+    bps: number;
+    bonus: number;
+  };
+  attacking: {
+    goals: number;
+    assists: number;
+    expected_goals: number;
+    expected_assists: number;
+    expected_goal_involvements: number;
+  };
+  defending: {
+    clean_sheets: number;
+    goals_conceded: number;
+    saves: number;
+    expected_goals_conceded: number;
+  };
+  discipline: {
+    yellow_cards: number;
+    red_cards: number;
+    own_goals: number;
+    penalties_saved: number;
+    penalties_missed: number;
+  };
+  ict: {
+    influence: number;
+    creativity: number;
+    threat: number;
+    ict_index: number;
+  };
 }
 
 function describe(p: PlayerMatch): string {
@@ -54,13 +97,14 @@ export function Dashboard() {
   const [name, setName] = useState('');
   const [gameweek, setGameweek] = useState<number>(1);
   const [matches, setMatches] = useState<PlayerMatch[] | null>(null);
-  const [result, setResult] = useState<GameweekStats | null>(null);
+  const [result, setResult] = useState<GameReportData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated) return;
-    apiClient.get<Bootstrap>('/fpl/bootstrap')
+    apiClient
+      .get<Bootstrap>('/fpl/bootstrap')
       .then((res) => {
         setBootstrap(res.data);
         setGameweek(res.data.current_gameweek);
@@ -77,7 +121,7 @@ export function Dashboard() {
     setError(null);
     setMatches(null);
     try {
-      const res = await apiClient.get<GameweekStats>(
+      const res = await apiClient.get<GameReportData>(
         `/fpl/players/${playerId}/gameweek/${gameweek}`,
       );
       setResult(res.data);
@@ -127,109 +171,78 @@ export function Dashboard() {
         </div>
       </nav>
 
-      <section className="dashboard-hero">
-        <h1>Gameweek Stats</h1>
-        <p>Live data from the Fantasy Premier League API.</p>
-      </section>
+      <section className="search-panel">
+        <form className="fpl-form" onSubmit={handleSubmit}>
+          <label className="fpl-field">
+            <span>Player</span>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Salah, Haaland, Saka…"
+              autoFocus
+            />
+          </label>
 
-      <section className="card-grid">
-        <div className="card fpl-card">
-          {bootstrapError && (
-            <div className="ping-result error">&#10007; {bootstrapError}</div>
-          )}
-
-          <form className="fpl-form" onSubmit={handleSubmit}>
-            <label className="fpl-field">
-              <span>Player name</span>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Salah, Haaland"
-                autoFocus
-              />
-            </label>
-
-            <label className="fpl-field">
-              <span>Gameweek</span>
-              <select
-                value={gameweek}
-                onChange={(e) => setGameweek(Number(e.target.value))}
-                disabled={!bootstrap}
-              >
-                {bootstrap &&
-                  Array.from({ length: bootstrap.total_gameweeks }, (_, i) => i + 1).map((gw) => (
-                    <option key={gw} value={gw}>
-                      GW {gw}
-                      {gw === bootstrap.current_gameweek ? ' (current)' : ''}
-                    </option>
-                  ))}
-              </select>
-            </label>
-
-            <button
-              type="submit"
-              className="ping-btn"
-              disabled={loading || !name.trim() || !bootstrap}
+          <label className="fpl-field">
+            <span>Gameweek</span>
+            <select
+              value={gameweek}
+              onChange={(e) => setGameweek(Number(e.target.value))}
+              disabled={!bootstrap}
             >
-              {loading ? 'Searching…' : 'Look up'}
-            </button>
-          </form>
-
-          {error && <div className="ping-result error">&#10007; {error}</div>}
-
-          {matches && (
-            <div className="match-list">
-              <p className="match-list-heading">Multiple matches — pick one:</p>
-              <ul>
-                {matches.map((p) => (
-                  <li key={p.id}>
-                    <button
-                      type="button"
-                      className="match-item"
-                      onClick={() => fetchStats(p.id)}
-                      disabled={loading}
-                    >
-                      {describe(p)}
-                    </button>
-                  </li>
+              {bootstrap &&
+                Array.from({ length: bootstrap.total_gameweeks }, (_, i) => i + 1).map((gw) => (
+                  <option key={gw} value={gw}>
+                    GW {gw}
+                    {gw === bootstrap.current_gameweek ? ' (current)' : ''}
+                  </option>
                 ))}
-              </ul>
-            </div>
-          )}
+            </select>
+          </label>
 
-          {result && (
-            <div className="stats-result">
-              <h3 className="stats-title">
-                {result.player.first_name} {result.player.second_name} · GW {result.gameweek}
-              </h3>
-              <table className="stats-table">
-                <tbody>
-                  {result.stats.map((row) => (
-                    <tr key={row.label}>
-                      <th>{row.label}</th>
-                      <td>{row.value === '' ? '—' : String(row.value)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+          <button
+            type="submit"
+            className="search-btn"
+            disabled={loading || !name.trim() || !bootstrap}
+          >
+            {loading ? 'Searching…' : 'Look up'}
+          </button>
+        </form>
+
+        {bootstrapError && (
+          <div className="inline-error">✗ {bootstrapError}</div>
+        )}
+        {error && <div className="inline-error">✗ {error}</div>}
+
+        {matches && (
+          <div className="match-list">
+            <p className="match-list-heading">Multiple matches — pick one:</p>
+            <ul>
+              {matches.map((p) => (
+                <li key={p.id}>
+                  <button
+                    type="button"
+                    className="match-item"
+                    onClick={() => fetchStats(p.id)}
+                    disabled={loading}
+                  >
+                    {describe(p)}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </section>
 
-      <div style={{ flex: 1 }} />
+      {result && <GameReport data={result} />}
 
-      <footer className="status-footer">
-        <div className="status-item">
-          <span className="dot" />
-          FPL API
+      {!result && !loading && !matches && !error && (
+        <div className="empty-state">
+          <p>Pick a player and gameweek to see their performance.</p>
         </div>
-        <div className="status-item">
-          <span className="dot" />
-          eu-west-2
-        </div>
-      </footer>
+      )}
     </div>
   );
 }
